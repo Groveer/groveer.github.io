@@ -1,0 +1,14 @@
+--- /usr/share/texlive/texmf-dist/tex/lualatex/plantuml/plantuml.lua    2018-03-09 06:56:58.000000000 +0800
++++ ./plantuml.lua   2022-08-10 15:19:58.000000000 +0800
+@@ -21,8 +21,10 @@
+     return
+   end
+
++  local lang = os.getenv("LANG")
++
+   texio.write("Executing PlantUML... ")
+-  local cmd = "java -jar " .. plantUmlJar .. " -t"
++  local cmd = "LC_CTYPE=" .. lang .. " java -jar " .. plantUmlJar .. " -t"
+   if (mode == "latex") then
+     cmd = cmd .. "latex:nopreamble"
+   else
