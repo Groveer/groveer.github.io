@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>如何优雅的使用 qemu-kvm | 易上止正</title>
+  <title>Qt 提升代码质量的方法 | 易上止正</title>
 
   <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon1.ico">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -533,14 +533,14 @@
 
 
 <div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1102/20201102115703662.jpg')">
+  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg')">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
   <div class="post-detail-header_info-box">
     <div class="title-box">
       <span class="title">
-        如何优雅的使用 qemu-kvm
+        Qt 提升代码质量的方法
       </span>
     </div>
     
@@ -555,8 +555,8 @@
         <span class="post-detail-header_categories">
           <i class="iconfont iconbookmark1"></i> 分类：
           
-            <a href="/categories/Tool/" class="post-detail-header_category">
-              Tool
+            <a href="/categories/Development/" class="post-detail-header_category">
+              Development
             </a>
           
         </span>
@@ -565,11 +565,11 @@
       
         <div class="post-detail-header_wordcount">
           <span class="totalcount">
-            <i class="fas fa-file-text-o"></i> 字数统计: 1.2k |
+            <i class="fas fa-file-text-o"></i> 字数统计: 241 |
           </span>
   
           <span class="min2read">
-            <i class="fas fa-clock"></i> 阅读时长: 4分钟 |
+            <i class="fas fa-clock"></i> 阅读时长: 1分钟 |
           </span>
   
           
@@ -596,58 +596,31 @@
   <div class="main-content">
     <article class="post post-detail">
       <div class="post-content">
-        <p>作为开发人员，往往需要在各种环境中进行调试，由于硬件资源的限制，调试环境的配置，往往需要花费大量的时间，本篇文章旨在使用 qemu-kvm 来配置各种调试环境，并且合理使用快照功能来实现各个环境的切换。</p>
-<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ol>
-<li>宿主机：通常为用户使用的机器，通常称为主机</li>
-<li>虚拟机：顾名思义，就是虚拟机</li>
+        <ol>
+<li>不需要的头文件不要包含</li>
+<li>尽量使用前置声明，而非一味的包头文件</li>
+<li>外部无需调用的成员函数声明为private，而非一味的放在public声明中</li>
+<li>能在函数中声明的变量，不要声明为类成员变量，减少变量作用域</li>
+<li>只在cpp文件中使用的常量，不要声明在h文件中，并且使用static限定作用域</li>
+<li>局部常量尽量使用const &amp;，而非static</li>
+<li>若定义变量无需修改，尽量使用const &amp;</li>
+<li>针对形参，如果是类而非基本数据类型则使用const &amp;</li>
+<li>在使用qt信号槽+lambda表达式时，第三个参数尽量指定具体对象，否则可能造成多次连接的情况</li>
+<li>尽量使用初始化列表初始化成员变量</li>
+<li>尽量使用Qt对象树或者智能指针（注意二者不能共用），而非裸指针</li>
 </ol>
-<h2 id="虚拟机的安装"><a href="#虚拟机的安装" class="headerlink" title="虚拟机的安装"></a>虚拟机的安装</h2><p>本篇文章希望读者可以理解 qemu 的运行原理，故不会介绍 gui 相关的操作，有兴趣的同学可以自行搜索相关知识。虚拟机的安装很简单，对于<code>Archlinux</code>，不需要图形界面的虚拟机，可以安装<code>qemu-base</code>，反之可以安装<code>qemu-desktop</code>。</p>
-<h2 id="创建硬盘镜像"><a href="#创建硬盘镜像" class="headerlink" title="创建硬盘镜像"></a>创建硬盘镜像</h2><ol>
-<li><p>硬盘镜像是一个文件，存储虚拟机硬盘上的内容。</p>
-</li>
-<li><p>一种硬盘镜像可能是<code>raw</code>镜像, 和主机上看到的内容一模一样，并且将始终使用主机上的硬盘驱动器的全部容量。此方法提供的 I&#x2F;O 开销最小，但可能会浪费大量空间，因为虚拟机上未使用的空间无法在主机上使用。</p>
-</li>
-<li><p>另外一种方式是<code>qcow2</code>格式，仅当主机实际写入内容的时候，才会分配镜像空间。对虚拟机来说，硬盘大小表现为完整大小，即使它可能仅占用主机系统上的非常小的空间。此映像格式还支持QEMU快照功能。但是，使用此格式可能会影响性能。</p>
-</li>
-<li><p>在创建硬盘镜像之前，需要准备一个目录存放硬盘镜像文件，一般为用户<code>home</code>目录。需要注意的是，如果主机使用的是<code>btrfs</code>文件系统，那么需要关闭其写时复制功能：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chattr +C dir</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>准备好目录后，可以在当前目录执行下面命令来创建硬盘镜像，也可以使用<code>-f raw</code>来创建raw格式的硬盘镜像，但是该格式不支持快照功能。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 &lt;image_file&gt; 80G</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="安装系统"><a href="#安装系统" class="headerlink" title="安装系统"></a>安装系统</h2><ol>
-<li><p>准备好安装介质，一般是各个操作系统发行版发布的iso文件。</p>
-</li>
-<li><p>第一次启动模拟器，为了在磁盘镜像上安装操作系统，必须同时将磁盘镜像与安装介质装载到虚拟机上，从安装介质中启动操作系统：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 -cdrom &lt;iso_image&gt; -boot menu=on -drive file=&lt;disk_image&gt; -m 4G -smp 4 -enable-kvm</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>-cdrom 参数指定安装介质。</li>
-<li>-boot 参数指定引导顺序，使用<code>menu=on</code>可以在虚拟机刚启动时按<code>esc</code>来手动选择启动顺序。</li>
-<li>-drive 参数指定硬盘镜像文件，该参数可以指定多个文件，但不同的文件有不同的用处，有兴趣的同学可以自行搜索相关资料。</li>
-<li>-m 参数指定虚拟机所使用的内存大小，可以自行调整，单位可以是M或G。</li>
-<li>-smp 参数指定虚拟机所使用的CPU个数，可以自行调整。</li>
-<li>-enable-kvm 参数使用kvm内核模块，如果不使用，虚拟机性能会非常差，如果开启失败，请检查bios设置中的虚拟机技术支持是否开启。</li>
-</ol>
-</li>
-<li><p>安装完成后，以后每次启动可以去掉<code>-cdrom</code>参数。</p>
-</li>
-</ol>
-<h2 id="快照管理"><a href="#快照管理" class="headerlink" title="快照管理"></a>快照管理</h2><p>在虚拟机关机状态下，使用<code>qemu-img snapshot</code>进行快照管理，可以使用<code>qemu-img snapshot --help</code>查看帮助，注意只有qcow2才能使用快照功能。<br>    1. <code>qemu-img snapshot -c Tag disk_image</code>在<code>disk_image</code>文件中创建名为<code>Tag</code>的快照。<br>    2. <code>qemu-img snapshot -l disk_image</code>查看<code>disk_image</code>文件中的快照信息。<br>    3. <code>qemu-img snapshot -a Tag disk_image</code>将<code>disk_image</code>还原到<code>Tag</code>时。<br>    4. <code>qemu-img snapshot -d Tag disk_image</code>将<code>disk_image</code>文件中的<code>Tag</code>快照删除。</p>
-<h2 id="硬盘镜像扩展"><a href="#硬盘镜像扩展" class="headerlink" title="硬盘镜像扩展"></a>硬盘镜像扩展</h2><ol>
-<li>当硬盘镜像不够使用时，可以对其进行扩展：<code>qemu-img resize disk_image +/-10G</code>。</li>
-<li>在磁盘映像扩容后，必须使用虚拟机内部系统的分区工具对该镜像进行分区并格式化后才能真正开始使用新空间。在收缩磁盘映像时，必须首先使用虚拟机内部系统的分区工具减少分该分区的大小，然后相应地收缩磁盘映像，否则收缩磁盘映像将导致数据丢失！</li>
-<li><code>注意</code>：调整包含NTFS引导文件系统的镜像将无法启动已安装的操作系统，推荐在操作之前进行备份。</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>使用上述的技巧可以灵活的使用虚拟机，并且可以将<code>qcow2</code>文件放置在移动硬盘中进行携带，那么一个硬盘镜像文件几乎可以满足各种调试场景的需求了。</p>
 
       </div>
       <div class="post-tags-categories">
         
         <div class="tags">
           
-            <a href="/tags/Tool/" class="">
-              Tool
+            <a href="/tags/Qt/" class="">
+              Qt
+            </a>
+          
+            <a href="/tags/C/" class="">
+              C++
             </a>
           
         </div>
@@ -661,7 +634,7 @@
     </li>
     <li class="post-copyright-link">
     <strong>文章链接:  </strong>
-    <a href="/2023/01/07/qemu/" target="_blank" title="如何优雅的使用 qemu-kvm">http://groveer.github.com/2023/01/07/qemu/</a>
+    <a href="/2023/01/07/qt-tips/" target="_blank" title="Qt 提升代码质量的方法">http://groveer.github.com/2023/01/07/qt-tips/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明:   </strong>
@@ -683,19 +656,19 @@
   <div class="post-nav-prev post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
     </div>
-    <a href="/2023/01/07/vim/" class="post-nav-link">
+    <a href="/2023/01/07/cmake-basic/" class="post-nav-link">
       <div class="title">
         <i class="fas fa-angle-left"></i> 上一篇:
-        <div class="title-text">vim 配置</div>
+        <div class="title-text">CMake 基础用法</div>
       </div>
       
       <!-- <div class="content">
-        保存时获得sudo权限1:w !sudo tee %
+        创建 CMake 项目大概需要以下几步：
 
-
-命令:w !&#123;cmd&#125;，让 vim 执行一
+首先需要一个目录当作工作空间，也叫项目目录
+在这个目录中有一些 c&#x2F
       </div> -->
     </a>
   </div>
@@ -706,15 +679,15 @@
   <div class="post-nav-next post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
     </div>
-    <a href="/2023/01/07/latex/" class="post-nav-link">
+    <a href="/2023/01/07/vscode/" class="post-nav-link">
       <div class="title">
         下一篇: <i class="fas fa-angle-right"></i>
-        <div class="title-text">Latex 环境配置</div>
+        <div class="title-text">VsCode 使用小技巧</div>
       </div>
       <!-- <div class="content">
-        安装基础软件ArchLinuxDeepin/Ubuntu1yay -S plantuml inkscape python
+        vscode中go开发环境配置安装插件首先go插件必须要安装上，安装完成后打开go文件，会提示安装gopls，但是此时不
       </div> -->
     </a>
   </div>
@@ -929,7 +902,7 @@
   <div class='content'>
     <div class="toc-main">
       <div class="toc-content">
-        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="toc-text">名词解释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-text">虚拟机的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%A1%AC%E7%9B%98%E9%95%9C%E5%83%8F"><span class="toc-text">创建硬盘镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F"><span class="toc-text">安装系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E7%85%A7%E7%AE%A1%E7%90%86"><span class="toc-text">快照管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A1%AC%E7%9B%98%E9%95%9C%E5%83%8F%E6%89%A9%E5%B1%95"><span class="toc-text">硬盘镜像扩展</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol> -->
+        <!--  -->
         <div class="toc"></div>
       </div>
     </div>

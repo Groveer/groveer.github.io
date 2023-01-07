@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>如何优雅的使用 qemu-kvm | 易上止正</title>
+  <title>标签: C++ | 易上止正</title>
 
   <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon1.ico">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -520,710 +520,114 @@
 </header>
         <!-- 内容区域 -->
         
- <!-- prismjs 代码高亮 -->
- 
 
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"></div>
+<div class="bg-light-floor-tagDetail" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -3;"></div>
 
-<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
-
-
-  <!-- 文章详情页顶部图片和标题 -->
-
-
-
-
-<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1102/20201102115703662.jpg')">
-  <div class="post-detail-header-mask"></div>
-  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
-  
-  <div class="post-detail-header_info-box">
-    <div class="title-box">
-      <span class="title">
-        如何优雅的使用 qemu-kvm
-      </span>
-    </div>
-    
-    
-      
-        <span class="post-detail-header_date">
-          <i class="fas fa-calendar"></i> 发表于：2023-01-07 |
-        </span>
-      
-
-      
-        <span class="post-detail-header_categories">
-          <i class="iconfont iconbookmark1"></i> 分类：
-          
-            <a href="/categories/Tool/" class="post-detail-header_category">
-              Tool
-            </a>
-          
-        </span>
-      
-
-      
-        <div class="post-detail-header_wordcount">
-          <span class="totalcount">
-            <i class="fas fa-file-text-o"></i> 字数统计: 1.2k |
-          </span>
-  
-          <span class="min2read">
-            <i class="fas fa-clock"></i> 阅读时长: 4分钟 |
-          </span>
-  
-          
-            <span class="reading">
-              <i class="fas fa-eye"></i> 阅读量：<span id="busuanzi_value_page_pv"></span>
-            </span>
-          
-        </div>
-      
-    
+<div class="tag-header" style="background-image: url('https://pic1.zhimg.com/80/v2-604a15cef201cf177943af2d915eb2e7_1440w.jpg?source=1940ef5c');">
+  <div class="tag-header-title">
+    标签
   </div>
+  <div class="tag-header-desc">
   
-  
-    <script src="/js/bubble/bubble.js"></script>
-  
-</div>
-
-
-
-
-
-<div class="post-detail-content post-row" 
-  style="padding-top: 0px;">
-  <div class="main-content">
-    <article class="post post-detail">
-      <div class="post-content">
-        <p>作为开发人员，往往需要在各种环境中进行调试，由于硬件资源的限制，调试环境的配置，往往需要花费大量的时间，本篇文章旨在使用 qemu-kvm 来配置各种调试环境，并且合理使用快照功能来实现各个环境的切换。</p>
-<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ol>
-<li>宿主机：通常为用户使用的机器，通常称为主机</li>
-<li>虚拟机：顾名思义，就是虚拟机</li>
-</ol>
-<h2 id="虚拟机的安装"><a href="#虚拟机的安装" class="headerlink" title="虚拟机的安装"></a>虚拟机的安装</h2><p>本篇文章希望读者可以理解 qemu 的运行原理，故不会介绍 gui 相关的操作，有兴趣的同学可以自行搜索相关知识。虚拟机的安装很简单，对于<code>Archlinux</code>，不需要图形界面的虚拟机，可以安装<code>qemu-base</code>，反之可以安装<code>qemu-desktop</code>。</p>
-<h2 id="创建硬盘镜像"><a href="#创建硬盘镜像" class="headerlink" title="创建硬盘镜像"></a>创建硬盘镜像</h2><ol>
-<li><p>硬盘镜像是一个文件，存储虚拟机硬盘上的内容。</p>
-</li>
-<li><p>一种硬盘镜像可能是<code>raw</code>镜像, 和主机上看到的内容一模一样，并且将始终使用主机上的硬盘驱动器的全部容量。此方法提供的 I&#x2F;O 开销最小，但可能会浪费大量空间，因为虚拟机上未使用的空间无法在主机上使用。</p>
-</li>
-<li><p>另外一种方式是<code>qcow2</code>格式，仅当主机实际写入内容的时候，才会分配镜像空间。对虚拟机来说，硬盘大小表现为完整大小，即使它可能仅占用主机系统上的非常小的空间。此映像格式还支持QEMU快照功能。但是，使用此格式可能会影响性能。</p>
-</li>
-<li><p>在创建硬盘镜像之前，需要准备一个目录存放硬盘镜像文件，一般为用户<code>home</code>目录。需要注意的是，如果主机使用的是<code>btrfs</code>文件系统，那么需要关闭其写时复制功能：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chattr +C dir</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>准备好目录后，可以在当前目录执行下面命令来创建硬盘镜像，也可以使用<code>-f raw</code>来创建raw格式的硬盘镜像，但是该格式不支持快照功能。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 &lt;image_file&gt; 80G</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="安装系统"><a href="#安装系统" class="headerlink" title="安装系统"></a>安装系统</h2><ol>
-<li><p>准备好安装介质，一般是各个操作系统发行版发布的iso文件。</p>
-</li>
-<li><p>第一次启动模拟器，为了在磁盘镜像上安装操作系统，必须同时将磁盘镜像与安装介质装载到虚拟机上，从安装介质中启动操作系统：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 -cdrom &lt;iso_image&gt; -boot menu=on -drive file=&lt;disk_image&gt; -m 4G -smp 4 -enable-kvm</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>-cdrom 参数指定安装介质。</li>
-<li>-boot 参数指定引导顺序，使用<code>menu=on</code>可以在虚拟机刚启动时按<code>esc</code>来手动选择启动顺序。</li>
-<li>-drive 参数指定硬盘镜像文件，该参数可以指定多个文件，但不同的文件有不同的用处，有兴趣的同学可以自行搜索相关资料。</li>
-<li>-m 参数指定虚拟机所使用的内存大小，可以自行调整，单位可以是M或G。</li>
-<li>-smp 参数指定虚拟机所使用的CPU个数，可以自行调整。</li>
-<li>-enable-kvm 参数使用kvm内核模块，如果不使用，虚拟机性能会非常差，如果开启失败，请检查bios设置中的虚拟机技术支持是否开启。</li>
-</ol>
-</li>
-<li><p>安装完成后，以后每次启动可以去掉<code>-cdrom</code>参数。</p>
-</li>
-</ol>
-<h2 id="快照管理"><a href="#快照管理" class="headerlink" title="快照管理"></a>快照管理</h2><p>在虚拟机关机状态下，使用<code>qemu-img snapshot</code>进行快照管理，可以使用<code>qemu-img snapshot --help</code>查看帮助，注意只有qcow2才能使用快照功能。<br>    1. <code>qemu-img snapshot -c Tag disk_image</code>在<code>disk_image</code>文件中创建名为<code>Tag</code>的快照。<br>    2. <code>qemu-img snapshot -l disk_image</code>查看<code>disk_image</code>文件中的快照信息。<br>    3. <code>qemu-img snapshot -a Tag disk_image</code>将<code>disk_image</code>还原到<code>Tag</code>时。<br>    4. <code>qemu-img snapshot -d Tag disk_image</code>将<code>disk_image</code>文件中的<code>Tag</code>快照删除。</p>
-<h2 id="硬盘镜像扩展"><a href="#硬盘镜像扩展" class="headerlink" title="硬盘镜像扩展"></a>硬盘镜像扩展</h2><ol>
-<li>当硬盘镜像不够使用时，可以对其进行扩展：<code>qemu-img resize disk_image +/-10G</code>。</li>
-<li>在磁盘映像扩容后，必须使用虚拟机内部系统的分区工具对该镜像进行分区并格式化后才能真正开始使用新空间。在收缩磁盘映像时，必须首先使用虚拟机内部系统的分区工具减少分该分区的大小，然后相应地收缩磁盘映像，否则收缩磁盘映像将导致数据丢失！</li>
-<li><code>注意</code>：调整包含NTFS引导文件系统的镜像将无法启动已安装的操作系统，推荐在操作之前进行备份。</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>使用上述的技巧可以灵活的使用虚拟机，并且可以将<code>qcow2</code>文件放置在移动硬盘中进行携带，那么一个硬盘镜像文件几乎可以满足各种调试场景的需求了。</p>
-
-      </div>
-      <div class="post-tags-categories">
-        
-        <div class="tags">
-          
-            <a href="/tags/Tool/" class="">
-              Tool
-            </a>
-          
-        </div>
-        
-      </div>
-      
-        <div class="copyright">
-  <ul class="post-copyright">
-    <li class="post-copyright-author">
-    <strong>作者:  </strong>易上止正</a>
-    </li>
-    <li class="post-copyright-link">
-    <strong>文章链接:  </strong>
-    <a href="/2023/01/07/qemu/" target="_blank" title="如何优雅的使用 qemu-kvm">http://groveer.github.com/2023/01/07/qemu/</a>
-    </li>
-    <li class="post-copyright-license">
-      <strong>版权声明:   </strong>
-      本网站所有文章除特别声明外,均采用 <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">CC BY-NC-ND 4.0</a>
-      许可协议。转载请注明出处!
-    </li>
-  </ul>
-<div>
-      
-    </article>
-    <!-- 上一篇文章和下一篇文章 -->
-    
-      <!-- 文章详情页的上一页和下一页 -->
-<div class="post-nav">
-
-
-
-  
-  <div class="post-nav-prev post-nav-item">
-    <div class="post-nav-img" style="background-size: cover; 
-      background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
-    </div>
-    <a href="/2023/01/07/vim/" class="post-nav-link">
-      <div class="title">
-        <i class="fas fa-angle-left"></i> 上一篇:
-        <div class="title-text">vim 配置</div>
-      </div>
-      
-      <!-- <div class="content">
-        保存时获得sudo权限1:w !sudo tee %
-
-
-命令:w !&#123;cmd&#125;，让 vim 执行一
-      </div> -->
-    </a>
-  </div>
-
-
-
-  
-  <div class="post-nav-next post-nav-item">
-    <div class="post-nav-img" style="background-size: cover; 
-      background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
-    </div>
-    <a href="/2023/01/07/latex/" class="post-nav-link">
-      <div class="title">
-        下一篇: <i class="fas fa-angle-right"></i>
-        <div class="title-text">Latex 环境配置</div>
-      </div>
-      <!-- <div class="content">
-        安装基础软件ArchLinuxDeepin/Ubuntu1yay -S plantuml inkscape python
-      </div> -->
-    </a>
-  </div>
-
-</div>
-
-    
-    
-
-    <!-- 打赏 -->
-    
-      <div id="appDonate" class="post-donate">
-  <div id="donate_board" class="donate_bar center" ref="donate">
-    <a id="btn_donate" class="btn_donate" href="javascript:;" title="打赏" @click="showDialogDrawer()"></a>
-  </div>
-  <transition name="fade">
-    <div 
-      class="donate-box-mask"
-      v-cloak 
-      v-show="visible"
-      @click="cancelDialogDrawer()"
-    >
-    </div>
-  </transition>
-  <transition name="bounce">
-    <div class="donate-box" v-cloak v-show="visible">
-      <div class="donate-box_close">
-        <i class="fas fa-times" aria-hidden="true" @click="cancelDialogDrawer" pointer></i>
-      </div>
-      <div class="donate-box_title">
-        <h4>
-          你的赏识是我前进的动力
-        </h4>
-      </div>
-      <div class="donate-box_tab">
-        <div class="Alipay" pointer :class="{'active': tabActive === 'Alipay'}" @click="changeTabActive('Alipay')">
-          支付宝
-        </div>
-        <div class="WeChatpay" pointer :class="{'active': tabActive === 'WeChatpay'}" @click="changeTabActive('WeChatpay')">
-          微信
-        </div>
-      </div>
-      <div class="donate-box_img">
-        <div class="AlipayImg" v-show="tabActive === 'Alipay'">
-          <img src="/img/zhifuba_pay.jpg" class="lazyload placeholder" data-srcset="/img/zhifuba_pay.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="支付宝打赏" />
-        </div> 
-        <div class="WeChatpayImg" v-show="tabActive === 'WeChatpay'">
-          <img src="/img/weixin_pay.jpg" class="lazyload placeholder" data-srcset="/img/weixin_pay.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="微信打赏" />
-        </div>
-      </div>
-    </div>
-  </transition>
-</div>
-
-<script>
-  var body = document.body || document.documentElement || window;
-  var vm = new Vue({
-    el: '#appDonate',
-    data: {
-      visible: false,
-      tabActive: 'Alipay',
-      top: 0,
-    },
-    computed: {
-    },
-    mounted() {
-    },
-    methods: {
-      showDialogDrawer() {
-        this.visible = true;
-        // 防止页面滚动，只能让弹框滚动
-        // function getScroll() {
-        //   return {
-        //     left: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0,
-        //     top: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
-        //   };
-        // }
-        this.top = $(document).scrollTop() // or getScroll().top
-        // console.log('aa', $('.main-content'));
-        body.style.cssText = 'overflow: hidden;';
-      },
-      cancelDialogDrawer() {
-        this.visible = false;
-        body.removeAttribute('style');
-        $(document).scrollTop(this.top)
-      },
-      changeTabActive(name) {
-        this.tabActive = name;
-      }
-    },
-    created() {}
-  })
-</script>
-    
-
-    <!-- 分享 -->
-    
-      <!-- https://github.com/overtrue/share.js -->
-<!-- 文章详情页的分享 -->
-<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
-
-<script src="/js/shareJs/social-share.min.js"></script>
-</script>
-
-<style>
-  .social-share {
-    margin: 20px 0;
+    <span class="title" id="tag-header-desc"></span>
+    <script>
+  function typedFn() {
+    const el = '#tag-header-desc';
+    const type = 'tagDetail';
+    let desc = '愿你如风，被人温柔以待'
+    var typed = new Typed(el, {
+      strings: [desc],
+      startDelay: 100,
+      typeSpeed: 100,
+      loop: true,
+      backSpeed: 50,
+      showCursor: true
+    });
   }
-</style>
-
-
-    
-    
-    <!-- 评论 -->
-    <!-- 评论 -->
-
-  <div id="myComment">
-    
-      <div id="gitment-container"></div>
-
+  typedFn();
+</script>
     
   </div>
+  <div class="mask-box"></div>
+</div>
 
-<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
 
 
+<div class="tag">
+  <div class="tag-name">
+    <div class="name" style="background-color: #85C1E9;">C++ 分类</div>
   </div>
+  <!-- 每一篇文章卡片 -->
+  <!-- hash算法 -->
 
-  <!-- 目录 -->
-  
-<aside id='l_side'>
+<section class="posts">
   
     
-      
-        <section class="widget side_blogger">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box rectangle' href='/about/'>
-          <img src='/img/logo.jpg'/>
+    <article class="post reveal" style="flex-direction: row-reverse;   ">
+      <div class="post-main">
+        <div class="post-info">
+          <div class="post-time">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+            <span class="post-time">2023-01-07</span>
+          </div>
+          <div class="post-title">
+            <a class="post-title-link" href="/2023/01/07/qt-tips/">Qt 提升代码质量的方法</a>
+          </div>
+          <div class="post-meta">
+            <div class="post-tags">
+              <!-- 文章详情页的标签 -->
+
+    <i class="iconfont icontag"></i>
+    <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C/" rel="tag">C++</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Qt/" rel="tag">Qt</a></li></ul>
+
+            </div>
+            <div class="post-categories">
+              <!-- 文章详情页的分类 -->
+
+<div class="article-category">
+  <i class="iconfont iconbookmark1"></i>
+  <a class="article-category-link" href="/categories/Development/">Development</a>
+</div>
+
+
+            </div>
+          </div>
+          <div class="post-img-mobile">
+            <a href="/2023/01/07/qt-tips/" style="background-size: cover; 
+              background-position: center center;">
+              <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
+            </a>
+          </div>
+          <div class="post-content">
+            
+不需要的头文件不要包含
+尽量使用前置声明，而非一味的包头文件
+外部无需调用的成员函数声明为private，而非一味的放在public声明中
+能在函数中声明的变量，不要声明为类成员变量，减少变量作用域
+只在cpp文件中使用的常量，不要声明在
+          </div>
+        </div>
+        <div class="post-more">
+          <a href="/2023/01/07/qt-tips/">
+            <i class="iconfont iconmore" pointer style="float: right;  " title="阅读更多"></i>
+          </a>
+        </div>
+      </div>
+      <div class="post-img">
+        <a href="/2023/01/07/qt-tips/" style="background-size: cover; 
+          background-position: center center;">
+          <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
         </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>易上止正</h2>
-        
-        
-          <p>付出不亚于任何人的努力</p>
-
-        
-        
-          <p><span id="jinrishici-sentence">易上止正</span></p>
-          <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
-        
       </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="mailto:groveer@outlook.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/groveer"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="tencent://AddContact/?fromId=50&amp;fromSubId=1&amp;subcmd=all&amp;uin=2329507"
-              class="social fab fa-qq flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
+    </article>
+  
 </section>
-
-      
-    
-  
-  
-  
-
-  <div class="layout_sticky">    
-    
-      
-<section class="widget side_toc">
-  
-  <header>
-    
-      <i style="color: " class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
-    
-  </header>
-
-
-  <div class='content'>
-    <div class="toc-main">
-      <div class="toc-content">
-        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="toc-text">名词解释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-text">虚拟机的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%A1%AC%E7%9B%98%E9%95%9C%E5%83%8F"><span class="toc-text">创建硬盘镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F"><span class="toc-text">安装系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E7%85%A7%E7%AE%A1%E7%90%86"><span class="toc-text">快照管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A1%AC%E7%9B%98%E9%95%9C%E5%83%8F%E6%89%A9%E5%B1%95"><span class="toc-text">硬盘镜像扩展</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol> -->
-        <div class="toc"></div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- 手机端目录按钮 -->
-<div id="toc-mobile-btn">
-  <i class="fas fa-list-ul" aria-hidden="true"></i>
 </div>
 
-      
-  <section class="widget side_recent_post">
-    
-  <header>
-    
-      <a style="color: " href='/tags/'><i class="fas fa-book fa-fw" aria-hidden="true"></i><span class='name'>最新文章</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      
-      <!-- hash算法 -->
-      
-      <div class="aside-list">
-        
-          <div class="aside-list-item">
-            
-            
-            
-
-            <div class="post-img-box">
-              <a href="/2023/01/07/cmake-advanced/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                
-                  <span class="post-date">01-07</span>
-                
-              </div>
-              <a class="post-title" href="/2023/01/07/cmake-advanced/">CMake 进阶用法</a>
-            </div>
-          </div>
-        
-          <div class="aside-list-item">
-            
-            
-            
-
-            <div class="post-img-box">
-              <a href="/2023/01/07/cmake-basic/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                
-                  <span class="post-date">01-07</span>
-                
-              </div>
-              <a class="post-title" href="/2023/01/07/cmake-basic/">CMake 基础用法</a>
-            </div>
-          </div>
-        
-          <div class="aside-list-item">
-            
-            
-            
-
-            <div class="post-img-box">
-              <a href="/2023/01/07/qt-tips/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                
-                  <span class="post-date">01-07</span>
-                
-              </div>
-              <a class="post-title" href="/2023/01/07/qt-tips/">Qt 提升代码质量的方法</a>
-            </div>
-          </div>
-        
-          <div class="aside-list-item">
-            
-            
-            
-
-            <div class="post-img-box">
-              <a href="/2023/01/07/vscode/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                
-                  <span class="post-date">01-07</span>
-                
-              </div>
-              <a class="post-title" href="/2023/01/07/vscode/">VsCode 使用小技巧</a>
-            </div>
-          </div>
-        
-          <div class="aside-list-item">
-            
-            
-            
-
-            <div class="post-img-box">
-              <a href="/2023/01/07/vim/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                
-                  <span class="post-date">01-07</span>
-                
-              </div>
-              <a class="post-title" href="/2023/01/07/vim/">vim 配置</a>
-            </div>
-          </div>
-        
-      </div>
-    </div>
-  </section>
-
-    
-  </div>
-</aside>
-
-
-  <!-- 图片放大 Wrap images with fancybox support -->
-  <script src="/js/wrapImage.js"></script>
-</div>
-
-<!-- 文章详情页背景图 -->
-<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
-	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
-	<transition-group tag="ul" :name="names">
-		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
-			<img :src="image" class="bg-swiper-img no-lazy">
-		</li>
-	</transition-group>
-</div>
-<script>
-	var vm = new Vue({
-		el: '#appBgSwiper',
-		data: {
-			names: '' || 'fade' || 'fade', // translate-fade fade
-			mark: 0,
-			img: [],
-			bgColor: '',
-			time: null
-		},
-		methods: {   //添加方法
-			change(i, m) {
-				if (i > m) {
-					// this.names = 'fade';
-				} else if (i < m) {
-					// this.names = 'fade';
-				} else {
-					return;
-				}
-				this.mark = i;
-			},
-			prev() {
-				// this.names = 'fade';
-				this.mark--;
-				if (this.mark === -1) {
-					this.mark = 3;
-					return
-				}
-			},
-			next() {
-				// this.names = 'fade';
-				this.mark++;
-				if (this.mark === this.img.length) {
-					this.mark = 0;
-					return
-				}
-			},
-			autoPlay() {
-				// this.names = 'fade';
-				this.mark++;
-				if (this.mark === this.img.length) {
-					this.mark = 0;
-					return
-				}
-			},
-			play() {
-				let bgImgDelay = '' || '180000'
-				let delay = parseInt(bgImgDelay) || 180000;
-				this.time = setInterval(this.autoPlay, delay);
-			},
-			enter() {
-				clearInterval(this.time);
-			},
-			leave() {
-				this.play();
-			}
-		},
-		created() {
-			this.play()
-		},
-		beforeDestroy() {
-			clearInterval(this.time);
-		},
-		mounted() {
-			let prop = '' || '';
-			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
-			if (isImg) {
-				let img = prop.split(',');
-				let configRoot = '/'
-				let arrImg = [];
-				img.forEach(el => {
-					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
-					var objExp = new RegExp(Expression);
-
-					if (objExp.test(el)) {
-						// http or https
-						arrImg.push(el);
-					} else {
-						// 非http or https开头
-						// 本地文件
-						let firstStr = el.charAt(0);
-						if (firstStr == '/') {
-							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
-						}
-						el = configRoot + el;
-						arrImg.push(el);
-					}
-				})
-				this.img = arrImg;
-			} else {
-				this.bgColor = prop;
-			}
-		}
-	})
-</script>
-
-<style>
-	.bg-swiper-box {
-		position: absolute;
-		display: block;
-		width: 100%;
-		height: 100%;
-	}
-
-	.bg-swiper-img {
-		object-fit: cover;
-		width: 100%;
-		height: 100%;
-	}
-</style>
-
-
-
-
-  <script>
-  function loadMermaid() {
-    if (document.getElementsByClassName('mermaid').length) {
-      if (window.mermaidJsLoad) mermaid.init()
-      else {
-        loadScript('https://unpkg.com/mermaid/dist/mermaid.min.js').then(() => {
-          window.mermaidJsLoad = true
-          mermaid.initialize({
-            theme: 'default',
-          })
-          if ('true') {
-            mermaid.init();
-          }
-        })
-      }
-    }
-  };
-  document.addEventListener("DOMContentLoaded", function () {
-    loadMermaid();
-  })
-
-  document.addEventListener('pjax:complete', function () {
-    loadMermaid();
-  })
+<div class="w-70">
   
-</script>
-
+</div>
 
       </main>
     </div>

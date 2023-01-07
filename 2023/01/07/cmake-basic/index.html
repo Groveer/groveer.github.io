@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>如何优雅的使用 qemu-kvm | 易上止正</title>
+  <title>CMake 基础用法 | 易上止正</title>
 
   <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon1.ico">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -533,14 +533,14 @@
 
 
 <div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1102/20201102115703662.jpg')">
+  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg')">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
   <div class="post-detail-header_info-box">
     <div class="title-box">
       <span class="title">
-        如何优雅的使用 qemu-kvm
+        CMake 基础用法
       </span>
     </div>
     
@@ -555,8 +555,8 @@
         <span class="post-detail-header_categories">
           <i class="iconfont iconbookmark1"></i> 分类：
           
-            <a href="/categories/Tool/" class="post-detail-header_category">
-              Tool
+            <a href="/categories/Development/" class="post-detail-header_category">
+              Development
             </a>
           
         </span>
@@ -565,11 +565,11 @@
       
         <div class="post-detail-header_wordcount">
           <span class="totalcount">
-            <i class="fas fa-file-text-o"></i> 字数统计: 1.2k |
+            <i class="fas fa-file-text-o"></i> 字数统计: 2.1k |
           </span>
   
           <span class="min2read">
-            <i class="fas fa-clock"></i> 阅读时长: 4分钟 |
+            <i class="fas fa-clock"></i> 阅读时长: 8分钟 |
           </span>
   
           
@@ -596,58 +596,35 @@
   <div class="main-content">
     <article class="post post-detail">
       <div class="post-content">
-        <p>作为开发人员，往往需要在各种环境中进行调试，由于硬件资源的限制，调试环境的配置，往往需要花费大量的时间，本篇文章旨在使用 qemu-kvm 来配置各种调试环境，并且合理使用快照功能来实现各个环境的切换。</p>
-<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ol>
-<li>宿主机：通常为用户使用的机器，通常称为主机</li>
-<li>虚拟机：顾名思义，就是虚拟机</li>
-</ol>
-<h2 id="虚拟机的安装"><a href="#虚拟机的安装" class="headerlink" title="虚拟机的安装"></a>虚拟机的安装</h2><p>本篇文章希望读者可以理解 qemu 的运行原理，故不会介绍 gui 相关的操作，有兴趣的同学可以自行搜索相关知识。虚拟机的安装很简单，对于<code>Archlinux</code>，不需要图形界面的虚拟机，可以安装<code>qemu-base</code>，反之可以安装<code>qemu-desktop</code>。</p>
-<h2 id="创建硬盘镜像"><a href="#创建硬盘镜像" class="headerlink" title="创建硬盘镜像"></a>创建硬盘镜像</h2><ol>
-<li><p>硬盘镜像是一个文件，存储虚拟机硬盘上的内容。</p>
-</li>
-<li><p>一种硬盘镜像可能是<code>raw</code>镜像, 和主机上看到的内容一模一样，并且将始终使用主机上的硬盘驱动器的全部容量。此方法提供的 I&#x2F;O 开销最小，但可能会浪费大量空间，因为虚拟机上未使用的空间无法在主机上使用。</p>
-</li>
-<li><p>另外一种方式是<code>qcow2</code>格式，仅当主机实际写入内容的时候，才会分配镜像空间。对虚拟机来说，硬盘大小表现为完整大小，即使它可能仅占用主机系统上的非常小的空间。此映像格式还支持QEMU快照功能。但是，使用此格式可能会影响性能。</p>
-</li>
-<li><p>在创建硬盘镜像之前，需要准备一个目录存放硬盘镜像文件，一般为用户<code>home</code>目录。需要注意的是，如果主机使用的是<code>btrfs</code>文件系统，那么需要关闭其写时复制功能：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chattr +C dir</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>准备好目录后，可以在当前目录执行下面命令来创建硬盘镜像，也可以使用<code>-f raw</code>来创建raw格式的硬盘镜像，但是该格式不支持快照功能。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 &lt;image_file&gt; 80G</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="安装系统"><a href="#安装系统" class="headerlink" title="安装系统"></a>安装系统</h2><ol>
-<li><p>准备好安装介质，一般是各个操作系统发行版发布的iso文件。</p>
-</li>
-<li><p>第一次启动模拟器，为了在磁盘镜像上安装操作系统，必须同时将磁盘镜像与安装介质装载到虚拟机上，从安装介质中启动操作系统：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 -cdrom &lt;iso_image&gt; -boot menu=on -drive file=&lt;disk_image&gt; -m 4G -smp 4 -enable-kvm</span><br></pre></td></tr></table></figure>
-
+        <p>创建 CMake 项目大概需要以下几步：</p>
 <ol>
-<li>-cdrom 参数指定安装介质。</li>
-<li>-boot 参数指定引导顺序，使用<code>menu=on</code>可以在虚拟机刚启动时按<code>esc</code>来手动选择启动顺序。</li>
-<li>-drive 参数指定硬盘镜像文件，该参数可以指定多个文件，但不同的文件有不同的用处，有兴趣的同学可以自行搜索相关资料。</li>
-<li>-m 参数指定虚拟机所使用的内存大小，可以自行调整，单位可以是M或G。</li>
-<li>-smp 参数指定虚拟机所使用的CPU个数，可以自行调整。</li>
-<li>-enable-kvm 参数使用kvm内核模块，如果不使用，虚拟机性能会非常差，如果开启失败，请检查bios设置中的虚拟机技术支持是否开启。</li>
+<li>首先需要一个目录当作工作空间，也叫项目目录</li>
+<li>在这个目录中有一些 c&#x2F;cpp 文件需要进行编译和链接</li>
+<li>此时，需要一个 CMakeLists.txt 文件来进行项目管理。</li>
 </ol>
-</li>
-<li><p>安装完成后，以后每次启动可以去掉<code>-cdrom</code>参数。</p>
-</li>
-</ol>
-<h2 id="快照管理"><a href="#快照管理" class="headerlink" title="快照管理"></a>快照管理</h2><p>在虚拟机关机状态下，使用<code>qemu-img snapshot</code>进行快照管理，可以使用<code>qemu-img snapshot --help</code>查看帮助，注意只有qcow2才能使用快照功能。<br>    1. <code>qemu-img snapshot -c Tag disk_image</code>在<code>disk_image</code>文件中创建名为<code>Tag</code>的快照。<br>    2. <code>qemu-img snapshot -l disk_image</code>查看<code>disk_image</code>文件中的快照信息。<br>    3. <code>qemu-img snapshot -a Tag disk_image</code>将<code>disk_image</code>还原到<code>Tag</code>时。<br>    4. <code>qemu-img snapshot -d Tag disk_image</code>将<code>disk_image</code>文件中的<code>Tag</code>快照删除。</p>
-<h2 id="硬盘镜像扩展"><a href="#硬盘镜像扩展" class="headerlink" title="硬盘镜像扩展"></a>硬盘镜像扩展</h2><ol>
-<li>当硬盘镜像不够使用时，可以对其进行扩展：<code>qemu-img resize disk_image +/-10G</code>。</li>
-<li>在磁盘映像扩容后，必须使用虚拟机内部系统的分区工具对该镜像进行分区并格式化后才能真正开始使用新空间。在收缩磁盘映像时，必须首先使用虚拟机内部系统的分区工具减少分该分区的大小，然后相应地收缩磁盘映像，否则收缩磁盘映像将导致数据丢失！</li>
-<li><code>注意</code>：调整包含NTFS引导文件系统的镜像将无法启动已安装的操作系统，推荐在操作之前进行备份。</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>使用上述的技巧可以灵活的使用虚拟机，并且可以将<code>qcow2</code>文件放置在移动硬盘中进行携带，那么一个硬盘镜像文件几乎可以满足各种调试场景的需求了。</p>
+<h2 id="创建标准-C-程序"><a href="#创建标准-C-程序" class="headerlink" title="创建标准 C 程序"></a>创建标准 C 程序</h2><p>这里以标准 C 编写一个 demo，如何将 cmake 参数传递到代码中，编写 main.c 文件，内容为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span> <span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    (<span class="type">void</span>)(argc);</span><br><span class="line">    (<span class="type">void</span>)(argv);</span><br><span class="line">    <span class="comment">// VERSION 宏使用示例，可使用‘cmake -DVERSION=1.1.1’来指定不同的值</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> VERSION</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;test version: %s\n&quot;</span>, VERSION);</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;test version: 1.0.0\n&quot;</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span>  <span class="comment">// DEBUG</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在当前目录编写 CMakeLists.txt，内容为：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.13</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># If do&#x27;t define version number, specify the version number</span></span><br><span class="line"><span class="keyword">set</span>(VERSION <span class="string">&quot;1.0.0&quot;</span> CACHE <span class="keyword">STRING</span> <span class="string">&quot;define project version&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># project 有两种写法，这里建议使用这种写法，补全信息有助于后续使用</span></span><br><span class="line"><span class="keyword">project</span>(cdemo</span><br><span class="line">    LANGUAGES C</span><br><span class="line">    HOMEPAGE_URL https://github.com/Groveer/cdemo</span><br><span class="line">    DESCRIPTION <span class="string">&quot;c program demo.&quot;</span></span><br><span class="line">    VERSION <span class="variable">$&#123;VERSION&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义GNU标准安装目录，使用此定义可兼容不同发行版之间的安装目录差异</span></span><br><span class="line"><span class="keyword">include</span>(GNUInstallDirs)</span><br><span class="line"><span class="comment"># 设置C标准</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_C_STANDARD <span class="number">11</span>)</span><br><span class="line"><span class="comment"># 设置为检查C标准打开，若未设置CMAKE_C_STANDARD，则会报错</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_C_STANDARD_REQUIRED <span class="keyword">on</span>)</span><br><span class="line"><span class="comment"># 设置包含当前目录，建议头文件的包含写全路径</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_INCLUDE_CURRENT_DIR <span class="keyword">ON</span>)</span><br><span class="line"><span class="comment"># 打开所有编译警告，理论上项目中不允许有编译警告</span></span><br><span class="line"><span class="comment"># 关于编译选项，项目中不应该添加任何额外的参数，若发行版需要，则应由发行版的配置文件添加，若Debug需要，则应只添加到Debug模式中</span></span><br><span class="line"><span class="comment"># 在外部添加编译参数的方法，例：cmake -DCMAKE_C_FLAGS=&quot;-Wl,--as-needed&quot;</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_C_FLAGS <span class="string">&quot;$&#123;CMAKE_C_FLAGS&#125; -Wall -Wextra&quot;</span>)</span><br><span class="line"><span class="comment"># 生成编译命令，用于支持clangd</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_EXPORT_COMPILE_COMMANDS <span class="keyword">ON</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若未指定安装前缀，则指定前缀为/usr</span></span><br><span class="line"><span class="comment"># 注意大部分发行版默认会将前缀设置为/usr/local，所以若需要安装到/usr，还需在编译时指定</span></span><br><span class="line"><span class="keyword">if</span> (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)</span><br><span class="line">    <span class="keyword">set</span>(CMAKE_INSTALL_PREFIX /usr)</span><br><span class="line"><span class="keyword">endif</span> ()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若未指定编译类型，则指定为Release，防止某些发行版不指定编译类型</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">NOT</span> CMAKE_BUILD_TYPE)</span><br><span class="line">    <span class="keyword">set</span>(CMAKE_BUILD_TYPE Release CACHE <span class="keyword">STRING</span> <span class="string">&quot;Choose Debug or Release&quot;</span> FORCE)</span><br><span class="line"><span class="keyword">endif</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若当前编译类型为Debug，添加asan以检测内存泄漏</span></span><br><span class="line"><span class="comment"># 对应的还有CMAKE_CXX_FLAGS_RELEASE，Debug模式无需加-g参数，Release模式也无需加-O优化，默认cmake会帮我们加上</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_C_FLAGS_DEBUG <span class="string">&quot;$&#123;CMAKE_C_FLAGS_DEBUG&#125; -fsanitize=address -fno-omit-frame-pointer&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 某些平台可能需要手动指定mieee参数，否则会有浮点数精度问题，如sw_64</span></span><br><span class="line"><span class="comment"># 使用方式：cmake -DENABLE_MIEEE</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">DEFINED</span> ENABLE_MIEEE)</span><br><span class="line">    <span class="keyword">set</span>(CMAKE_C_FLAGS <span class="string">&quot;$&#123;CMAKE_C_FLAGS&#125; -mieee&quot;</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若目标库安装了.cmake文件，则可以直接使用find_package</span></span><br><span class="line"><span class="comment">#find_package(PkgConfig REQUIRED)</span></span><br><span class="line"><span class="comment"># 若目标库未安装.cmake文件，但是安装了.pc文件，则可以使用pkgconfig</span></span><br><span class="line"><span class="comment">#pkg_search_module(XCB REQUIRED xcb)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 建议对不同的模块进行分类，可使用通配符，可指定具名文件</span></span><br><span class="line"><span class="keyword">file</span>(GLOB_RECURSE SRCS</span><br><span class="line">    <span class="string">&quot;main.c&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(BIN_NAME <span class="variable">$&#123;PROJECT_NAME&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成可执行文件</span></span><br><span class="line"><span class="keyword">add_executable</span>(<span class="variable">$&#123;BIN_NAME&#125;</span></span><br><span class="line">    <span class="variable">$&#123;SRCS&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安全编译选项，二进制需使用‘-fPIE’编译参数和‘-pie’链接参数，库需使用‘-fPIC’编译参数，两者之间有冲突不能同时使用，注意区分</span></span><br><span class="line"><span class="keyword">target_compile_options</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE -fPIE)</span><br><span class="line"><span class="keyword">target_link_options</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE -pie)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里针对当前二进制定义了一个宏，保存着版本号，方便程序代码中调用，若程序中需要自定义宏变量并且在代码中使用，可参考此方法。</span></span><br><span class="line"><span class="comment"># 注意CMAKE_PROJECT_XXX系列变量，某些属性是cmake帮助提供，但某些属性是project方法设置的，所以这里需要注意变量是否可用。</span></span><br><span class="line"><span class="comment"># 至于是使用add_compile_xxx还是target_compile_xxx，视情况而定，一个是指定所有对象，一个是指定具体的二进制</span></span><br><span class="line"><span class="keyword">target_compile_definitions</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE VERSION=<span class="string">&quot;$&#123;CMAKE_PROJECT_VERSION&#125;&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">target_include_directories</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PUBLIC</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">target_link_libraries</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定安装目录，一般常用有3个： TARGETS（编译出来的目标二进制）、FILES（指定路径的文件，通常是配置文件或服务文件）、DIRECTORY（一般是配置文件较多时使用）。</span></span><br><span class="line"><span class="keyword">install</span>(TARGETS <span class="variable">$&#123;BIN_NAME&#125;</span> DESTINATION <span class="variable">$&#123;CMAKE_INSTALL_BINDIR&#125;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="创建基于-Qt-的-C-程序"><a href="#创建基于-Qt-的-C-程序" class="headerlink" title="创建基于 Qt 的 C++ 程序"></a>创建基于 Qt 的 C++ 程序</h2><p>与上一章做同样功能，但是使用基于 Qt 框架来开发，同样输出自定义版本号。编写 main.cpp 文件，内容为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QDebug&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;qglobal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">Q_UNUSED</span>(argc);</span><br><span class="line">    <span class="built_in">Q_UNUSED</span>(argv);</span><br><span class="line">    <span class="comment">// VERSION 宏使用示例，可使用‘cmake -DVERSION=1.1.1’来指定不同的值</span></span><br><span class="line">    QString version;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> VERSION</span></span><br><span class="line">    version = VERSION;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    version = <span class="string">&quot;1.0.1&quot;</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span>  <span class="comment">// DEBUG</span></span></span><br><span class="line">    <span class="built_in">qDebug</span>() &lt;&lt; <span class="string">&quot;test version: &quot;</span> &lt;&lt; version &lt;&lt; <span class="string">&quot;!&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在当前目录编写 CMakeLists.txt，内容为：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.13</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># If do&#x27;t define version number, specify the version number</span></span><br><span class="line"><span class="keyword">set</span>(VERSION <span class="string">&quot;1.0.0&quot;</span> CACHE <span class="keyword">STRING</span> <span class="string">&quot;define project version&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># project 有两种写法，这里建议使用这种写法，补全信息有助于后续使用</span></span><br><span class="line"><span class="keyword">project</span>(qtdemo</span><br><span class="line">    LANGUAGES CXX</span><br><span class="line">    HOMEPAGE_URL https://github.com/Groveer/qtdemo</span><br><span class="line">    DESCRIPTION <span class="string">&quot;qt program demo.&quot;</span></span><br><span class="line">    VERSION <span class="variable">$&#123;VERSION&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义GNU标准安装目录，使用此定义可兼容不同发行版之间的安装目录差异</span></span><br><span class="line"><span class="keyword">include</span>(GNUInstallDirs)</span><br><span class="line"><span class="comment"># 设置C++标准</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD <span class="number">17</span>)</span><br><span class="line"><span class="comment"># 设置为检查C++标准打开，若未设置CMAKE_CXX_STANDARD，则会报错</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD_REQUIRED <span class="keyword">on</span>)</span><br><span class="line"><span class="comment"># 若使用标准C++开发，则不需要以下两行，使用Qt则需要</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTOMOC <span class="keyword">ON</span>)</span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTORCC <span class="keyword">ON</span>)</span><br><span class="line"><span class="comment"># 设置包含当前目录，建议头文件的包含写全路径</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_INCLUDE_CURRENT_DIR <span class="keyword">ON</span>)</span><br><span class="line"><span class="comment"># 打开所有编译警告，理论上项目中不允许有编译警告</span></span><br><span class="line"><span class="comment"># 在外部添加编译参数的方法，例：cmake -DCMAKE_CXX_FLAGS=&quot;-Wl,--as-needed&quot;</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_FLAGS <span class="string">&quot;$&#123;CMAKE_CXX_FLAGS&#125; -Wall -Wextra&quot;</span>)</span><br><span class="line"><span class="comment"># 生成编译命令，用于支持clangd</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_EXPORT_COMPILE_COMMANDS <span class="keyword">ON</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若未指定安装前缀，则指定前缀为/usr</span></span><br><span class="line"><span class="comment"># 注意大部分发行版默认会将前缀设置为/usr/local，所以若需要安装到/usr，还需在编译时指定</span></span><br><span class="line"><span class="keyword">if</span> (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)</span><br><span class="line">    <span class="keyword">set</span>(CMAKE_INSTALL_PREFIX /usr)</span><br><span class="line"><span class="keyword">endif</span> ()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若未指定编译类型，则指定为Release，防止某些发行版不指定编译类型</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">NOT</span> CMAKE_BUILD_TYPE)</span><br><span class="line">    <span class="keyword">set</span>(CMAKE_BUILD_TYPE Release CACHE <span class="keyword">STRING</span> <span class="string">&quot;Choose Debug or Release&quot;</span> FORCE)</span><br><span class="line"><span class="keyword">endif</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若当前编译类型为Debug，添加asan以检测内存泄漏</span></span><br><span class="line"><span class="comment"># 对应的还有CMAKE_CXX_FLAGS_RELEASE，Debug模式无需加-g参数，Release模式也无需加-O优化，默认cmake会帮我们加上</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_FLAGS_DEBUG <span class="string">&quot;$&#123;CMAKE_CXX_FLAGS_DEBUG&#125; -fsanitize=address -fno-omit-frame-pointer&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 某些平台可能需要手动指定mieee参数，否则会有浮点数精度问题，如sw_64</span></span><br><span class="line"><span class="comment"># 使用方式：cmake -DENABLE_MIEEE</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">DEFINED</span> ENABLE_MIEEE)</span><br><span class="line">    <span class="keyword">set</span>(CMAKE_CXX_FLAGS <span class="string">&quot;$&#123;CMAKE_CXX_FLAGS&#125; -mieee&quot;</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若目标库安装了.cmake文件，则可以直接使用find_package</span></span><br><span class="line"><span class="comment">#find_package(PkgConfig REQUIRED)</span></span><br><span class="line"><span class="comment"># 若目标库未安装.cmake文件，但是安装了.pc文件，则可以使用pkgconfig</span></span><br><span class="line"><span class="comment">#pkg_search_module(XCB REQUIRED xcb)</span></span><br><span class="line"><span class="keyword">find_package</span>(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)</span><br><span class="line"><span class="keyword">find_package</span>(Qt<span class="variable">$&#123;QT_VERSION_MAJOR&#125;</span> REQUIRED COMPONENTS Core Gui)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建议对不同的模块进行分类，可使用通配符，可指定具名文件</span></span><br><span class="line"><span class="keyword">file</span>(GLOB_RECURSE SRCS</span><br><span class="line">    <span class="string">&quot;main.cpp&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(BIN_NAME <span class="variable">$&#123;PROJECT_NAME&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成可执行文件</span></span><br><span class="line"><span class="keyword">add_executable</span>(<span class="variable">$&#123;BIN_NAME&#125;</span></span><br><span class="line">    <span class="variable">$&#123;SRCS&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安全编译选项，二进制需使用‘-fPIE’编译参数和‘-pie’链接参数，库需使用‘-fPIC’编译参数，两者之间有冲突不能同时使用，注意区分</span></span><br><span class="line"><span class="keyword">target_compile_options</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE -fPIE)</span><br><span class="line"><span class="keyword">target_link_options</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE -pie)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里针对当前二进制定义了一个宏，保存着版本号，方便程序代码中调用，若程序中需要自定义宏变量并且在代码中使用，可参考此方法。</span></span><br><span class="line"><span class="comment"># 注意CMAKE_PROJECT_XXX系列变量，某些属性是cmake帮助提供，但某些属性是project方法设置的，所以这里需要注意变量是否可用。</span></span><br><span class="line"><span class="comment"># 至于是使用add_compile_xxx还是target_compile_xxx，视情况而定，一个是指定所有对象，一个是指定具体的二进制</span></span><br><span class="line"><span class="keyword">target_compile_definitions</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE</span><br><span class="line">    VERSION=<span class="string">&quot;$&#123;CMAKE_PROJECT_VERSION&#125;&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Qt 从5.15版本开始，可以直接使用Qt::Core，而不需要加版本号，但为了兼容性，把版本号加上为好</span></span><br><span class="line"><span class="keyword">target_include_directories</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PUBLIC</span><br><span class="line">    Qt<span class="variable">$&#123;QT_VERSION_MAJOR&#125;</span>::Core</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">target_link_libraries</span>(<span class="variable">$&#123;BIN_NAME&#125;</span> PRIVATE</span><br><span class="line">    Qt<span class="variable">$&#123;QT_VERSION_MAJOR&#125;</span>::Core</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定安装目录，一般常用有3个： TARGETS（编译出来的目标二进制）、FILES（指定路径的文件，通常是配置文件或服务文件）、DIRECTORY（一般是配置文件较多时使用）。</span></span><br><span class="line"><span class="keyword">install</span>(TARGETS <span class="variable">$&#123;BIN_NAME&#125;</span> DESTINATION <span class="variable">$&#123;CMAKE_INSTALL_BINDIR&#125;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
       </div>
       <div class="post-tags-categories">
         
         <div class="tags">
           
-            <a href="/tags/Tool/" class="">
-              Tool
+            <a href="/tags/CMake/" class="">
+              CMake
+            </a>
+          
+            <a href="/tags/Qt/" class="">
+              Qt
             </a>
           
         </div>
@@ -661,7 +638,7 @@
     </li>
     <li class="post-copyright-link">
     <strong>文章链接:  </strong>
-    <a href="/2023/01/07/qemu/" target="_blank" title="如何优雅的使用 qemu-kvm">http://groveer.github.com/2023/01/07/qemu/</a>
+    <a href="/2023/01/07/cmake-basic/" target="_blank" title="CMake 基础用法">http://groveer.github.com/2023/01/07/cmake-basic/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明:   </strong>
@@ -683,19 +660,17 @@
   <div class="post-nav-prev post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
     </div>
-    <a href="/2023/01/07/vim/" class="post-nav-link">
+    <a href="/2023/01/07/cmake-advanced/" class="post-nav-link">
       <div class="title">
         <i class="fas fa-angle-left"></i> 上一篇:
-        <div class="title-text">vim 配置</div>
+        <div class="title-text">CMake 进阶用法</div>
       </div>
       
       <!-- <div class="content">
-        保存时获得sudo权限1:w !sudo tee %
-
-
-命令:w !&#123;cmd&#125;，让 vim 执行一
+        使用 CMake 创建一个简单的基于 Qt 的开发库，并且逐步添加单元测试和文档示例（doxygen）。
+一个简单的基于
       </div> -->
     </a>
   </div>
@@ -706,15 +681,18 @@
   <div class="post-nav-next post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
     </div>
-    <a href="/2023/01/07/latex/" class="post-nav-link">
+    <a href="/2023/01/07/qt-tips/" class="post-nav-link">
       <div class="title">
         下一篇: <i class="fas fa-angle-right"></i>
-        <div class="title-text">Latex 环境配置</div>
+        <div class="title-text">Qt 提升代码质量的方法</div>
       </div>
       <!-- <div class="content">
-        安装基础软件ArchLinuxDeepin/Ubuntu1yay -S plantuml inkscape python
+        
+不需要的头文件不要包含
+尽量使用前置声明，而非一味的包头文件
+外部无需调用的成员函数声明为private，而非一味的放
       </div> -->
     </a>
   </div>
@@ -929,7 +907,7 @@
   <div class='content'>
     <div class="toc-main">
       <div class="toc-content">
-        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="toc-text">名词解释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-text">虚拟机的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%A1%AC%E7%9B%98%E9%95%9C%E5%83%8F"><span class="toc-text">创建硬盘镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F"><span class="toc-text">安装系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E7%85%A7%E7%AE%A1%E7%90%86"><span class="toc-text">快照管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A1%AC%E7%9B%98%E9%95%9C%E5%83%8F%E6%89%A9%E5%B1%95"><span class="toc-text">硬盘镜像扩展</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol> -->
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%A0%87%E5%87%86-C-%E7%A8%8B%E5%BA%8F"><span class="toc-text">创建标准 C 程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%9F%BA%E4%BA%8E-Qt-%E7%9A%84-C-%E7%A8%8B%E5%BA%8F"><span class="toc-text">创建基于 Qt 的 C++ 程序</span></a></li></ol> -->
         <div class="toc"></div>
       </div>
     </div>
