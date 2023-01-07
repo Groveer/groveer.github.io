@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Linux 磁盘挂载</title>
+      <link href="/2023/01/07/linux-mount/"/>
+      <url>/2023/01/07/linux-mount/</url>
+      
+        <content type="html"><![CDATA[<p>这里提供一些在 Linux 环境下磁盘挂载小技巧。</p><h2 id="将U盘挂载到普通用户目录"><a href="#将U盘挂载到普通用户目录" class="headerlink" title="将U盘挂载到普通用户目录"></a>将U盘挂载到普通用户目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> <span class="variable">$HOME</span>/usb</span><br><span class="line">sudo mount /dev/sdb1 <span class="variable">$HOME</span>/usb -o uid=<span class="variable">$UID</span> -o gid=`<span class="built_in">id</span> -g <span class="variable">$USER</span>`</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>使用 systemd 实现自动登陆</title>
       <link href="/2023/01/07/linux-auto-login/"/>
       <url>/2023/01/07/linux-auto-login/</url>
