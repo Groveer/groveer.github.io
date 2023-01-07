@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>使用 systemd 实现自动登陆</title>
+      <link href="/2023/01/07/linux-auto-login/"/>
+      <url>/2023/01/07/linux-auto-login/</url>
+      
+        <content type="html"><![CDATA[<p>systemd 是一个 Linux 系统基础组件的集合，提供了一个系统和服务管理器，运行为 PID 1 并负责启动其它程序。使用 systemd 实现自动登录，其实就是开机自启 getty 服务，但默认的服务需要进行修改才能实现该功能。</p><h2 id="使用systemd实现自动登陆"><a href="#使用systemd实现自动登陆" class="headerlink" title="使用systemd实现自动登陆"></a>使用systemd实现自动登陆</h2><ol><li>修改文件<code>/etc/systemd/system/getty.target.wants/getty@tty1.service</code></li><li>追加<code>-a/--autologin USERNAME</code>到该行：<code>ExecStart=-/sbin/agetty --noclear %I $TERM</code></li><li>修改后：<code>ExecStart=-/sbin/agetty -a USERNAME %I $TERM</code></li><li>可能还会删除<code>-o &#39;-p -- \\u&#39;</code>（当前Arch安装中存在），因为这将启动登录名，USERNAME但仍要求输入密码。</li><li>重新启动后，您将自动登录。</li></ol><h2 id="防止systemd更新导致配置被重置"><a href="#防止systemd更新导致配置被重置" class="headerlink" title="防止systemd更新导致配置被重置"></a>防止systemd更新导致配置被重置</h2><ol><li>查看软链到哪个配置文件：<code>ls -l /etc/systemd/system/getty.target.wants/getty@tty1.service</code></li><li>结果为：<code>/usr/lib/systemd/system/getty@.service</code></li><li>修改文件属性：<code>sudo chattr +i /usr/lib/systemd/system/getty@.service</code></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Deepin 系统修复</title>
       <link href="/2023/01/07/deepin-repair-system/"/>
       <url>/2023/01/07/deepin-repair-system/</url>
