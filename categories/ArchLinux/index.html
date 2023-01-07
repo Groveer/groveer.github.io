@@ -19,21 +19,6 @@
   <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
   
   
-    <script>
-        var themeModelId = '1';
-        if (themeModelId) {
-            localStorage.setItem('modelId', themeModelId);
-        }
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
-    <script>
-        var live2dOpen = eval('false') || false;
-        if (!live2dOpen) {
-            localStorage.setItem('waifu-display', 1609323474481);
-        }
-    </script>
-  
   
   
 <link rel="stylesheet" href="/css/animate.min.css">
@@ -945,12 +930,21 @@
 }
 
 
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  left: -66px !important;
+}
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+  left: 0px !important;
+}
+
+
 </style>
 <meting-js  
   class=""
   server="netease"
   type="playlist"
-  id="https://music.163.com/#/playlist?id=2945028696"
+  id="2829779628"
   fixed='true'
   autoplay='true'
   theme='#42b983'
