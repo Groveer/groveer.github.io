@@ -41,7 +41,7 @@ Github:
   url: https://github.com/groveer/groveer.github.io
 
 # 网站logo
-logo: /img/logo.jpg # 为空则不显示
+logo: /img/logo1.jpg # 为空则不显示
 
 # 网站 favicon
 favicon: /favicon1.ico # or .png .jpg .svg .gif .jpeg .ico
