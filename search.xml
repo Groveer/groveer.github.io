@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>使用zram创建swap分区</title>
+      <link href="/2023/01/07/linux-zram/"/>
+      <url>/2023/01/07/linux-zram/</url>
+      
+        <content type="html"><![CDATA[<p>zram 通过在 RAM 内的压缩块设备上分页，直到必须使用硬盘上的交换空间，以避免在磁盘上进行分页，从而提高性能。由于 zram 可以用内存替代硬盘为系统提供交换空间的功能，zram 可以在需要交换&#x2F;分页时让 Linux 更好利用 RAM，在物理内存较少的旧电脑上尤其如此。<br>以下是一个简单的脚本用来创建 zram swap 设备，注意，这个脚本假设你还没有使用 zram，并提供了启动的 systemd 配置:</p><ol><li><p><code>/usr/local/bin/zramswap-on</code>:</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Disable zswap</span></span><br><span class="line">echo 0 &gt; /sys/module/zswap/parameters/enabled</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Load zram module</span></span><br><span class="line">modprobe zram</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">use zstd compression</span></span><br><span class="line">echo zstd &gt; /sys/block/zram0/comp_algorithm</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">echo</span> 512M &gt; /sys/block/zram0/disksize</span></span><br><span class="line">echo 2G &gt; /sys/block/zram0/disksize</span><br><span class="line"></span><br><span class="line">mkswap /dev/zram0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Priority can have values between -1 and 32767</span></span><br><span class="line">swapon /dev/zram0 -p 32767</span><br></pre></td></tr></table></figure></li><li><p><code>/usr/local/bin/zramswap-off</code>:</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">swapoff /dev/zram0</span><br><span class="line">echo 0 &gt; /sys/class/zram-control/hot_remove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Not required, but creating a blank uninitalzed drive</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">after removing one may be desired</span></span><br><span class="line">cat /sys/class/zram-control/hot_add</span><br></pre></td></tr></table></figure></li><li><p><code>/etc/systemd/system/create-zram-swap.service</code>：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Configures zram swap device</span><br><span class="line">After=local-fs.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=oneshot</span><br><span class="line">ExecStart=/usr/local/bin/zramswap-on</span><br><span class="line">ExecStop=/usr/local/bin/zramswap-off</span><br><span class="line">RemainAfterExit=yes</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br></pre></td></tr></table></figure><p>然后执行服务配置加载和激活:</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod +x /usr/local/bin/zramswap-on</span><br><span class="line">sudo chmod +x /usr/local/bin/zramswap-off</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl enable --now create-zram-swap.service</span><br></pre></td></tr></table></figure><p><em>参考</em>：<a href="https://cloud-atlas.readthedocs.io/zh_CN/latest/linux/redhat_linux/kernel/zram.html">https://cloud-atlas.readthedocs.io/zh_CN&#x2F;latest&#x2F;linux&#x2F;redhat_linux&#x2F;kernel&#x2F;zram.html</a></p></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Linux 磁盘挂载</title>
       <link href="/2023/01/07/linux-mount/"/>
       <url>/2023/01/07/linux-mount/</url>
