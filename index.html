@@ -1685,7 +1685,7 @@ tee 是一个把 stdin 保存到文件的小工具。
         :data="listData"
         :class-option="classOption"
         class="warp"
-        style="height: 30px"
+        style="height: 60px"
       >
         <ul class="index-notice-content__ul">
           
@@ -1697,6 +1697,23 @@ tee 是一个把 stdin 保存到文件的小工具。
                     <span title="#新的博客终于上线了 老的博客即将完成迁移！" style="color:red">
                       #新的博客终于上线了 老的博客即将完成迁移！
                     </span>
+                  
+                </div>
+                
+                  <div class="index-notice-content__date" style="color:red">
+                    2023-01-06
+                  </div>
+                
+              
+            </li>
+          
+            <li>
+              
+                <div class="index-notice-content__title">
+                  
+                    <a target="_blank" rel="noopener" href="https://groveer.github.io" title="#老博客完成迁移！" style="color:red">
+                      #老博客完成迁移！
+                    </a>
                   
                 </div>
                 
@@ -1720,7 +1737,7 @@ tee 是一个把 stdin 保存到文件的小工具。
 <script>
   var seamless = JSON.parse('false');
   seamless = seamless ? 0 : 30;
-  var listData = '[object Object]' || '';
+  var listData = '[object Object],[object Object]' || '';
   listData = listData.split(',');
   var vm = new Vue({
     el: '#appIndexNotice',
@@ -3006,7 +3023,7 @@ tee 是一个把 stdin 保存到文件的小工具。
         <div class="webinfo-item">
           <div>最后活动时间：</div>
           
-            <div id="last-update" style="display: none;">Sat Jan 07 2023 12:14:38 GMT+0000 (Coordinated Universal Time)</div>
+            <div id="last-update" style="display: none;">Sat Jan 07 2023 12:21:39 GMT+0000 (Coordinated Universal Time)</div>
             <div id="last-update-show">2023-01-07 日</div>
           
         </div>
