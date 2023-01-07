@@ -29,6 +29,31 @@
     
     
     <entry>
+      <title>Arch Linux 安装NVIDIA驱动</title>
+      <link href="/2023/01/07/archlinux-install-nvidia/"/>
+      <url>/2023/01/07/archlinux-install-nvidia/</url>
+      
+        <content type="html"><![CDATA[<p>Nvidia 的开源驱动是作为逆向工程开发的，性能毕竟比不上闭源驱动，本篇教程将教大家在 ArchLinux 上安装闭源驱动。</p><h2 id="禁用-nouveau"><a href="#禁用-nouveau" class="headerlink" title="禁用 nouveau"></a>禁用 nouveau</h2><ol><li><p>编辑配置文件，没有则创建：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/modprobe.d/blacklist.conf</span><br></pre></td></tr></table></figure></li><li><p>在最后一行添加：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">blacklist nouveau</span><br></pre></td></tr></table></figure></li><li><p>生成新的 initrd：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkinitcpio -P</span><br></pre></td></tr></table></figure></li></ol><h2 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h2><ol><li><p>执行重启命令：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure></li><li><p>重启之后查看 nouveau 是否运行，没有输出代表禁用生效：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep nouveau</span><br></pre></td></tr></table></figure></li></ol><h2 id="停止可视化桌面"><a href="#停止可视化桌面" class="headerlink" title="停止可视化桌面"></a>停止可视化桌面</h2><ol><li><p>如果使用显示管理器，切换到其他 tty 进行关闭，如 lightdm：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop lightdm</span><br></pre></td></tr></table></figure></li><li><p>如果直接startx启动图形服务，退出窗口管理器即可，如 openbox 的<code>Log Out</code></p></li></ol><h2 id="安装驱动"><a href="#安装驱动" class="headerlink" title="安装驱动"></a>安装驱动</h2><ol><li><p>Arch Linux 可以直接安装 Nvidia 驱动：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo pacman -S nvidia</span><br></pre></td></tr></table></figure></li><li><p>重启图形服务后检查：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvidia-smi</span><br></pre></td></tr></table></figure></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> ArchLinux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>ArchLinux 系统安装，保姆级教程</title>
       <link href="/2023/01/07/archlinux-install/"/>
       <url>/2023/01/07/archlinux-install/</url>
