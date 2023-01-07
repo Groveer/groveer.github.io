@@ -2,8 +2,8 @@
 title: ArchLinux 系统安装，保姆级教程
 date: 2023-01-07 12:06
 swiper: true # 将改文章放入轮播图中
-swiperImg: 'https://img1.baidu.com/it/u=2768163269,2039869058&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800' # 该文章在轮播图中的图片，可以是本地目录下图片也可以是http://xxx图片
-img: 'https://img1.baidu.com/it/u=2768163269,2039869058&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800' # 该文章图片，可以是本地目录下图片也可以是http://xxx图片
+swiperImg: 'https://pic.3gbizhi.com/2020/0924/20200924125423654.jpg' # 该文章在轮播图中的图片，可以是本地目录下图片也可以是http://xxx图片
+img: 'https://pic.3gbizhi.com/2020/0924/20200924125423654.jpg' # 该文章图片，可以是本地目录下图片也可以是http://xxx图片
 categories: ArchLinux
 tags: [Linux]
 top: true
