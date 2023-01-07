@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>Qt 提升代码质量的方法 | 易上止正</title>
+  <title>使用zram创建swap分区 | 易上止正</title>
 
   <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon1.ico">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -533,14 +533,14 @@
 
 
 <div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg')">
+  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1214/20201214113101309.jpg')">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
   <div class="post-detail-header_info-box">
     <div class="title-box">
       <span class="title">
-        Qt 提升代码质量的方法
+        使用zram创建swap分区
       </span>
     </div>
     
@@ -555,8 +555,8 @@
         <span class="post-detail-header_categories">
           <i class="iconfont iconbookmark1"></i> 分类：
           
-            <a href="/categories/Development/" class="post-detail-header_category">
-              Development
+            <a href="/categories/Linux/" class="post-detail-header_category">
+              Linux
             </a>
           
         </span>
@@ -565,7 +565,7 @@
       
         <div class="post-detail-header_wordcount">
           <span class="totalcount">
-            <i class="fas fa-file-text-o"></i> 字数统计: 241 |
+            <i class="fas fa-file-text-o"></i> 字数统计: 334 |
           </span>
   
           <span class="min2read">
@@ -596,18 +596,22 @@
   <div class="main-content">
     <article class="post post-detail">
       <div class="post-content">
-        <ol>
-<li>不需要的头文件不要包含</li>
-<li>尽量使用前置声明，而非一味的包头文件</li>
-<li>外部无需调用的成员函数声明为private，而非一味的放在public声明中</li>
-<li>能在函数中声明的变量，不要声明为类成员变量，减少变量作用域</li>
-<li>只在cpp文件中使用的常量，不要声明在h文件中，并且使用static限定作用域</li>
-<li>局部常量尽量使用const &amp;，而非static</li>
-<li>若定义变量无需修改，尽量使用const &amp;</li>
-<li>针对形参，如果是类而非基本数据类型则使用const &amp;</li>
-<li>在使用qt信号槽+lambda表达式时，第三个参数尽量指定具体对象，否则可能造成多次连接的情况</li>
-<li>尽量使用初始化列表初始化成员变量</li>
-<li>尽量使用Qt对象树或者智能指针（注意二者不能共用），而非裸指针</li>
+        <p>zram 通过在 RAM 内的压缩块设备上分页，直到必须使用硬盘上的交换空间，以避免在磁盘上进行分页，从而提高性能。由于 zram 可以用内存替代硬盘为系统提供交换空间的功能，zram 可以在需要交换&#x2F;分页时让 Linux 更好利用 RAM，在物理内存较少的旧电脑上尤其如此。<br>以下是一个简单的脚本用来创建 zram swap 设备，注意，这个脚本假设你还没有使用 zram，并提供了启动的 systemd 配置:</p>
+<ol>
+<li><p><code>/usr/local/bin/zramswap-on</code>:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Disable zswap</span></span><br><span class="line">echo 0 &gt; /sys/module/zswap/parameters/enabled</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Load zram module</span></span><br><span class="line">modprobe zram</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">use zstd compression</span></span><br><span class="line">echo zstd &gt; /sys/block/zram0/comp_algorithm</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">echo</span> 512M &gt; /sys/block/zram0/disksize</span></span><br><span class="line">echo 2G &gt; /sys/block/zram0/disksize</span><br><span class="line"></span><br><span class="line">mkswap /dev/zram0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Priority can have values between -1 and 32767</span></span><br><span class="line">swapon /dev/zram0 -p 32767</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>/usr/local/bin/zramswap-off</code>:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">swapoff /dev/zram0</span><br><span class="line">echo 0 &gt; /sys/class/zram-control/hot_remove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Not required, but creating a blank uninitalzed drive</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">after removing one may be desired</span></span><br><span class="line">cat /sys/class/zram-control/hot_add</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>/etc/systemd/system/create-zram-swap.service</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Configures zram swap device</span><br><span class="line">After=local-fs.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=oneshot</span><br><span class="line">ExecStart=/usr/local/bin/zramswap-on</span><br><span class="line">ExecStop=/usr/local/bin/zramswap-off</span><br><span class="line">RemainAfterExit=yes</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>然后执行服务配置加载和激活:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod +x /usr/local/bin/zramswap-on</span><br><span class="line">sudo chmod +x /usr/local/bin/zramswap-off</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl enable --now create-zram-swap.service</span><br></pre></td></tr></table></figure>
+
+<p><em>参考</em>：<a target="_blank" rel="noopener" href="https://cloud-atlas.readthedocs.io/zh_CN/latest/linux/redhat_linux/kernel/zram.html">https://cloud-atlas.readthedocs.io/zh_CN&#x2F;latest&#x2F;linux&#x2F;redhat_linux&#x2F;kernel&#x2F;zram.html</a></p>
+</li>
 </ol>
 
       </div>
@@ -615,12 +619,8 @@
         
         <div class="tags">
           
-            <a href="/tags/Qt/" class="">
-              Qt
-            </a>
-          
-            <a href="/tags/C/" class="">
-              C++
+            <a href="/tags/Linux/" class="">
+              Linux
             </a>
           
         </div>
@@ -634,7 +634,7 @@
     </li>
     <li class="post-copyright-link">
     <strong>文章链接:  </strong>
-    <a href="/2023/01/07/qt-tips/" target="_blank" title="Qt 提升代码质量的方法">http://groveer.github.com/2023/01/07/qt-tips/</a>
+    <a href="/linux-zram/" target="_blank" title="使用zram创建swap分区">http://groveer.github.com/linux-zram/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明:   </strong>
@@ -656,19 +656,17 @@
   <div class="post-nav-prev post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
     </div>
-    <a href="/2023/01/07/cmake-basic/" class="post-nav-link">
+    <a href="/git/" class="post-nav-link">
       <div class="title">
         <i class="fas fa-angle-left"></i> 上一篇:
-        <div class="title-text">CMake 基础用法</div>
+        <div class="title-text">git 命令使用方法</div>
       </div>
       
       <!-- <div class="content">
-        创建 CMake 项目大概需要以下几步：
-
-首先需要一个目录当作工作空间，也叫项目目录
-在这个目录中有一些 c&#x2F
+        本文章只提供一些不常见的用法，对于 git 基本用法，网上教程很多，这里不再赘述。
+统计两个tag间代码增删情况1git
       </div> -->
     </a>
   </div>
@@ -679,15 +677,16 @@
   <div class="post-nav-next post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1010/20201010015227209.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1010/20201010015227209.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
     </div>
-    <a href="/2023/01/07/vscode/" class="post-nav-link">
+    <a href="/linux-mount/" class="post-nav-link">
       <div class="title">
         下一篇: <i class="fas fa-angle-right"></i>
-        <div class="title-text">VsCode 使用小技巧</div>
+        <div class="title-text">Linux 磁盘挂载</div>
       </div>
       <!-- <div class="content">
-        vscode中go开发环境配置安装插件首先go插件必须要安装上，安装完成后打开go文件，会提示安装gopls，但是此时不
+        这里提供一些在 Linux 环境下磁盘挂载小技巧。
+将U盘挂载到普通用户目录12mkdir $HOME/usbsudo 
       </div> -->
     </a>
   </div>
@@ -935,7 +934,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/cmake-advanced/" class="post-img " style="background-size: cover; 
+              <a href="/cmake-advanced/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -946,7 +945,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/cmake-advanced/">CMake 进阶用法</a>
+              <a class="post-title" href="/cmake-advanced/">CMake 进阶用法</a>
             </div>
           </div>
         
@@ -956,7 +955,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/cmake-basic/" class="post-img " style="background-size: cover; 
+              <a href="/cmake-basic/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -967,7 +966,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/cmake-basic/">CMake 基础用法</a>
+              <a class="post-title" href="/cmake-basic/">CMake 基础用法</a>
             </div>
           </div>
         
@@ -977,7 +976,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/qt-tips/" class="post-img " style="background-size: cover; 
+              <a href="/qt-tips/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -988,7 +987,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/qt-tips/">Qt 提升代码质量的方法</a>
+              <a class="post-title" href="/qt-tips/">Qt 提升代码质量的方法</a>
             </div>
           </div>
         
@@ -998,7 +997,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/vscode/" class="post-img " style="background-size: cover; 
+              <a href="/vscode/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -1009,7 +1008,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/vscode/">VsCode 使用小技巧</a>
+              <a class="post-title" href="/vscode/">VsCode 使用小技巧</a>
             </div>
           </div>
         
@@ -1019,7 +1018,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/vim/" class="post-img " style="background-size: cover; 
+              <a href="/vim/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -1030,7 +1029,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/vim/">vim 配置</a>
+              <a class="post-title" href="/vim/">vim 配置</a>
             </div>
           </div>
         

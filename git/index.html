@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>Latex 环境配置 | 易上止正</title>
+  <title>git 命令使用方法 | 易上止正</title>
 
   <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon1.ico">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -533,14 +533,14 @@
 
 
 <div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg')">
+  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg')">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
   <div class="post-detail-header_info-box">
     <div class="title-box">
       <span class="title">
-        Latex 环境配置
+        git 命令使用方法
       </span>
     </div>
     
@@ -565,11 +565,11 @@
       
         <div class="post-detail-header_wordcount">
           <span class="totalcount">
-            <i class="fas fa-file-text-o"></i> 字数统计: 442 |
+            <i class="fas fa-file-text-o"></i> 字数统计: 53 |
           </span>
   
           <span class="min2read">
-            <i class="fas fa-clock"></i> 阅读时长: 2分钟 |
+            <i class="fas fa-clock"></i> 阅读时长: 1分钟 |
           </span>
   
           
@@ -596,28 +596,8 @@
   <div class="main-content">
     <article class="post post-detail">
       <div class="post-content">
-        <h2 id="安装基础软件"><a href="#安装基础软件" class="headerlink" title="安装基础软件"></a>安装基础软件</h2><div class="tabs" id="tab-id"><ul class="nav-tabs"><li class="tab active"><a class="#tab-id-1">ArchLinux</a></li><li class="tab"><a class="#tab-id-2">Deepin/Ubuntu</a></li></ul><div class="tab-content"><div class="tab-pane active" id="tab-id-1"><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yay -S plantuml inkscape python-pygments texlive-core texlive-bibtexextra texlive-latexextra texlive-langchinese texlive-langjapanese</span><br></pre></td></tr></table></figure>
-
-<p>可能需要一些字体：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yay -S noto-fonts-cjk</span><br></pre></td></tr></table></figure></div><div class="tab-pane" id="tab-id-2"><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install plantuml inkscape python3-pygments make texlive-latex-base texlive-lang-chinese texlive-luatex texlive-latex-recommended texlive-latex-extra</span><br></pre></td></tr></table></figure></div></div></div>
-
-<h2 id="安装模板"><a href="#安装模板" class="headerlink" title="安装模板"></a>安装模板</h2><p>此模板为私有模板，无法访问不必纠结，可略过此节</p>
-<div class="tabs" id="tab-id"><ul class="nav-tabs"><li class="tab active"><a class="#tab-id-1">ArchLinux</a></li><li class="tab"><a class="#tab-id-2">Deepin/Ubuntu</a></li></ul><div class="tab-content"><div class="tab-pane active" id="tab-id-1"><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://gitlabwh.uniontech.com/rd/latex/latex.git</span><br><span class="line"><span class="built_in">cd</span> latex</span><br><span class="line"><span class="built_in">mkdir</span> -p ~/texmf/tex/latex/</span><br><span class="line"><span class="built_in">cp</span> -r uniontech ~/texmf/tex/latex/</span><br></pre></td></tr></table></figure></div><div class="tab-pane" id="tab-id-2"><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://gitlabwh.uniontech.com/rd/latex/latex.git</span><br><span class="line"><span class="built_in">cd</span> latex</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure></div></div></div>
-
-<h2 id="打中文支持补丁"><a href="#打中文支持补丁" class="headerlink" title="打中文支持补丁"></a>打中文支持补丁</h2><div class="tabs" id="tab-id"><ul class="nav-tabs"><li class="tab active"><a class="#tab-id-1">ArchLinux</a></li><li class="tab"><a class="#tab-id-2">Deepin/Ubuntu</a></li></ul><div class="tab-content"><div class="tab-pane active" id="tab-id-1"><figure class="highlight patch"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--- /usr/share/texmf-dist/tex/lualatex/plantuml/plantuml.lua    2022-04-17 16:12:47.000000000 +0800</span></span><br><span class="line"><span class="comment">+++ /tmp/plantuml.lua   2022-10-25 11:19:18.203071671 +0800</span></span><br><span class="line"><span class="meta">@@ -21,8 +21,9 @@</span> function convertPlantUmlToTikz(jobname,</span><br><span class="line">     return</span><br><span class="line">   end</span><br><span class="line"></span><br><span class="line"><span class="addition">+  local lang = os.getenv(&quot;LANG&quot;)</span></span><br><span class="line">   texio.write(&quot;Executing PlantUML... &quot;)</span><br><span class="line"><span class="deletion">-  local cmd = &quot;java -Djava.awt.headless=true -jar &quot; .. plantUmlJar .. &quot; -charset UTF-8 -t&quot;</span></span><br><span class="line"><span class="addition">+  local cmd = &quot;LC_CTYPE=&quot; .. lang .. &quot; java -Djava.awt.headless=true -jar &quot; .. plantUmlJar .. &quot; -charset UTF-8 -t&quot;</span></span><br><span class="line">   if (mode == &quot;latex&quot;) then</span><br><span class="line">     cmd = cmd .. &quot;latex:nopreamble&quot;</span><br><span class="line">   else</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo  patch --verbose /usr/share/texmf-dist/tex/lualatex/plantuml/plantuml.lua &lt; patch</span><br></pre></td></tr></table></figure></div><div class="tab-pane" id="tab-id-2"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">--- /usr/share/texlive/texmf-dist/tex/lualatex/plantuml/plantuml.lua    2018-03-09 06:56:58.000000000 +0800</span><br><span class="line">+++ /tmp/plantuml.lua   2022-08-10 15:19:58.000000000 +0800</span><br><span class="line">@@ -21,8 +21,10 @@</span><br><span class="line">     return</span><br><span class="line">   end</span><br><span class="line"></span><br><span class="line">+  local lang = os.getenv(&quot;LANG&quot;)</span><br><span class="line">+</span><br><span class="line">   texio.write(&quot;Executing PlantUML... &quot;)</span><br><span class="line">-  local cmd = &quot;java -jar &quot; .. plantUmlJar .. &quot; -t&quot;</span><br><span class="line">+  local cmd = &quot;LC_CTYPE=&quot; .. lang .. &quot; java -jar &quot; .. plantUmlJar .. &quot; -t&quot;</span><br><span class="line">   if (mode == &quot;latex&quot;) then</span><br><span class="line">     cmd = cmd .. &quot;latex:nopreamble&quot;</span><br><span class="line">   else</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo patch --verbose /usr/share/texlive/texmf-dist/tex/lualatex/plantuml/plantuml.lua &lt; patch</span><br></pre></td></tr></table></figure></div></div></div>
-
-<h2 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h2><div class="tabs" id="tab-id"><ul class="nav-tabs"><li class="tab active"><a class="#tab-id-1">ArchLinux</a></li><li class="tab"><a class="#tab-id-2">Deepin/Ubuntu</a></li></ul><div class="tab-content"><div class="tab-pane active" id="tab-id-1"><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PLANTUML_JAR=/usr/share/java/plantuml/plantuml.jar \</span><br><span class="line">lualatex <span class="string">&quot;-shell-escape&quot;</span> \</span><br><span class="line">    -synctex=1 \</span><br><span class="line">    -interaction=nonstopmode \</span><br><span class="line">    -file-line-error \</span><br><span class="line">    &#123;FILE_NEME&#125;</span><br></pre></td></tr></table></figure></div><div class="tab-pane" id="tab-id-2"><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PLANTUML_JAR=/usr/share/plantuml/plantuml.jar \</span><br><span class="line">lualatex <span class="string">&quot;-shell-escape&quot;</span> \</span><br><span class="line">    -synctex=1 \</span><br><span class="line">    -interaction=nonstopmode \</span><br><span class="line">    -file-line-error \</span><br><span class="line">    &#123;FILE_NEME&#125;</span><br></pre></td></tr></table></figure></div></div></div>
-
-<blockquote>
-<p>需要注意的是，Deepin 系统下的 plantuml 版本可能比较老旧（&#x2F;usr&#x2F;share&#x2F;plantuml&#x2F;plantuml.jar），可在其他系统上拷贝较新的版本或使用本文章附件。</p>
-</blockquote>
-<h3 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h3><ul>
-<li><a href="/resources/plantuml-1.2022.6.jar">plantuml 包</a></li>
-</ul>
+        <p>本文章只提供一些不常见的用法，对于 git 基本用法，网上教程很多，这里不再赘述。</p>
+<h2 id="统计两个tag间代码增删情况"><a href="#统计两个tag间代码增删情况" class="headerlink" title="统计两个tag间代码增删情况"></a>统计两个tag间代码增删情况</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git diff tag1..tag2 --shortstat &#x27;:(exclude)translations&#x27;</span><br></pre></td></tr></table></figure>
 
       </div>
       <div class="post-tags-categories">
@@ -639,7 +619,7 @@
     </li>
     <li class="post-copyright-link">
     <strong>文章链接:  </strong>
-    <a href="/2023/01/07/latex/" target="_blank" title="Latex 环境配置">http://groveer.github.com/2023/01/07/latex/</a>
+    <a href="/git/" target="_blank" title="git 命令使用方法">http://groveer.github.com/git/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明:   </strong>
@@ -661,16 +641,16 @@
   <div class="post-nav-prev post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1102/20201102115703662.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1102/20201102115703662.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1111/20201111023253951.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
     </div>
-    <a href="/2023/01/07/qemu/" class="post-nav-link">
+    <a href="/latex/" class="post-nav-link">
       <div class="title">
         <i class="fas fa-angle-left"></i> 上一篇:
-        <div class="title-text">如何优雅的使用 qemu-kvm</div>
+        <div class="title-text">Latex 环境配置</div>
       </div>
       
       <!-- <div class="content">
-        作为开发人员，往往需要在各种环境中进行调试，由于硬件资源的限制，调试环境的配置，往往需要花费大量的时间，本篇文章旨在使用
+        安装基础软件ArchLinuxDeepin/Ubuntu1yay -S plantuml inkscape python
       </div> -->
     </a>
   </div>
@@ -681,16 +661,15 @@
   <div class="post-nav-next post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1214/20201214113101309.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1214/20201214113101309.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
     </div>
-    <a href="/2023/01/07/git/" class="post-nav-link">
+    <a href="/linux-zram/" class="post-nav-link">
       <div class="title">
         下一篇: <i class="fas fa-angle-right"></i>
-        <div class="title-text">git 命令使用方法</div>
+        <div class="title-text">使用zram创建swap分区</div>
       </div>
       <!-- <div class="content">
-        本文章只提供一些不常见的用法，对于 git 基本用法，网上教程很多，这里不再赘述。
-统计两个tag间代码增删情况1git
+        zram 通过在 RAM 内的压缩块设备上分页，直到必须使用硬盘上的交换空间，以避免在磁盘上进行分页，从而提高性能。由于
       </div> -->
     </a>
   </div>
@@ -905,7 +884,7 @@
   <div class='content'>
     <div class="toc-main">
       <div class="toc-content">
-        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%9F%BA%E7%A1%80%E8%BD%AF%E4%BB%B6"><span class="toc-text">安装基础软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E6%A8%A1%E6%9D%BF"><span class="toc-text">安装模板</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%93%E4%B8%AD%E6%96%87%E6%94%AF%E6%8C%81%E8%A1%A5%E4%B8%81"><span class="toc-text">打中文支持补丁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA"><span class="toc-text">构建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%84%E4%BB%B6"><span class="toc-text">附件</span></a></li></ol></li></ol> -->
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E4%B8%A4%E4%B8%AAtag%E9%97%B4%E4%BB%A3%E7%A0%81%E5%A2%9E%E5%88%A0%E6%83%85%E5%86%B5"><span class="toc-text">统计两个tag间代码增删情况</span></a></li></ol> -->
         <div class="toc"></div>
       </div>
     </div>
@@ -938,7 +917,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/cmake-advanced/" class="post-img " style="background-size: cover; 
+              <a href="/cmake-advanced/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -949,7 +928,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/cmake-advanced/">CMake 进阶用法</a>
+              <a class="post-title" href="/cmake-advanced/">CMake 进阶用法</a>
             </div>
           </div>
         
@@ -959,7 +938,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/cmake-basic/" class="post-img " style="background-size: cover; 
+              <a href="/cmake-basic/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -970,7 +949,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/cmake-basic/">CMake 基础用法</a>
+              <a class="post-title" href="/cmake-basic/">CMake 基础用法</a>
             </div>
           </div>
         
@@ -980,7 +959,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/qt-tips/" class="post-img " style="background-size: cover; 
+              <a href="/qt-tips/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -991,7 +970,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/qt-tips/">Qt 提升代码质量的方法</a>
+              <a class="post-title" href="/qt-tips/">Qt 提升代码质量的方法</a>
             </div>
           </div>
         
@@ -1001,7 +980,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/vscode/" class="post-img " style="background-size: cover; 
+              <a href="/vscode/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -1012,7 +991,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/vscode/">VsCode 使用小技巧</a>
+              <a class="post-title" href="/vscode/">VsCode 使用小技巧</a>
             </div>
           </div>
         
@@ -1022,7 +1001,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/vim/" class="post-img " style="background-size: cover; 
+              <a href="/vim/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -1033,7 +1012,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/vim/">vim 配置</a>
+              <a class="post-title" href="/vim/">vim 配置</a>
             </div>
           </div>
         

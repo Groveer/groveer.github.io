@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>使用zram创建swap分区 | 易上止正</title>
+  <title>使用 systemd 实现自动登陆 | 易上止正</title>
 
   <link rel="icon" type="image/x-icon, image/vnd.microsoft.icon" href="/favicon1.ico">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -533,14 +533,14 @@
 
 
 <div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1214/20201214113101309.jpg')">
+  background-position: center center;position: relative;background-image:url('https://pic.3gbizhi.com/2020/1028/20201028105748283.jpg')">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
   <div class="post-detail-header_info-box">
     <div class="title-box">
       <span class="title">
-        使用zram创建swap分区
+        使用 systemd 实现自动登陆
       </span>
     </div>
     
@@ -565,7 +565,7 @@
       
         <div class="post-detail-header_wordcount">
           <span class="totalcount">
-            <i class="fas fa-file-text-o"></i> 字数统计: 334 |
+            <i class="fas fa-file-text-o"></i> 字数统计: 232 |
           </span>
   
           <span class="min2read">
@@ -596,22 +596,18 @@
   <div class="main-content">
     <article class="post post-detail">
       <div class="post-content">
-        <p>zram 通过在 RAM 内的压缩块设备上分页，直到必须使用硬盘上的交换空间，以避免在磁盘上进行分页，从而提高性能。由于 zram 可以用内存替代硬盘为系统提供交换空间的功能，zram 可以在需要交换&#x2F;分页时让 Linux 更好利用 RAM，在物理内存较少的旧电脑上尤其如此。<br>以下是一个简单的脚本用来创建 zram swap 设备，注意，这个脚本假设你还没有使用 zram，并提供了启动的 systemd 配置:</p>
-<ol>
-<li><p><code>/usr/local/bin/zramswap-on</code>:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Disable zswap</span></span><br><span class="line">echo 0 &gt; /sys/module/zswap/parameters/enabled</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Load zram module</span></span><br><span class="line">modprobe zram</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">use zstd compression</span></span><br><span class="line">echo zstd &gt; /sys/block/zram0/comp_algorithm</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">echo</span> 512M &gt; /sys/block/zram0/disksize</span></span><br><span class="line">echo 2G &gt; /sys/block/zram0/disksize</span><br><span class="line"></span><br><span class="line">mkswap /dev/zram0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Priority can have values between -1 and 32767</span></span><br><span class="line">swapon /dev/zram0 -p 32767</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>/usr/local/bin/zramswap-off</code>:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">swapoff /dev/zram0</span><br><span class="line">echo 0 &gt; /sys/class/zram-control/hot_remove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Not required, but creating a blank uninitalzed drive</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">after removing one may be desired</span></span><br><span class="line">cat /sys/class/zram-control/hot_add</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>/etc/systemd/system/create-zram-swap.service</code>：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Configures zram swap device</span><br><span class="line">After=local-fs.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=oneshot</span><br><span class="line">ExecStart=/usr/local/bin/zramswap-on</span><br><span class="line">ExecStop=/usr/local/bin/zramswap-off</span><br><span class="line">RemainAfterExit=yes</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br></pre></td></tr></table></figure>
-
-<p>然后执行服务配置加载和激活:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod +x /usr/local/bin/zramswap-on</span><br><span class="line">sudo chmod +x /usr/local/bin/zramswap-off</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl enable --now create-zram-swap.service</span><br></pre></td></tr></table></figure>
-
-<p><em>参考</em>：<a target="_blank" rel="noopener" href="https://cloud-atlas.readthedocs.io/zh_CN/latest/linux/redhat_linux/kernel/zram.html">https://cloud-atlas.readthedocs.io/zh_CN&#x2F;latest&#x2F;linux&#x2F;redhat_linux&#x2F;kernel&#x2F;zram.html</a></p>
-</li>
+        <p>systemd 是一个 Linux 系统基础组件的集合，提供了一个系统和服务管理器，运行为 PID 1 并负责启动其它程序。使用 systemd 实现自动登录，其实就是开机自启 getty 服务，但默认的服务需要进行修改才能实现该功能。</p>
+<h2 id="使用systemd实现自动登陆"><a href="#使用systemd实现自动登陆" class="headerlink" title="使用systemd实现自动登陆"></a>使用systemd实现自动登陆</h2><ol>
+<li>修改文件<code>/etc/systemd/system/getty.target.wants/getty@tty1.service</code></li>
+<li>追加<code>-a/--autologin USERNAME</code>到该行：<code>ExecStart=-/sbin/agetty --noclear %I $TERM</code></li>
+<li>修改后：<code>ExecStart=-/sbin/agetty -a USERNAME %I $TERM</code></li>
+<li>可能还会删除<code>-o &#39;-p -- \\u&#39;</code>（当前Arch安装中存在），因为这将启动登录名，USERNAME但仍要求输入密码。</li>
+<li>重新启动后，您将自动登录。</li>
+</ol>
+<h2 id="防止systemd更新导致配置被重置"><a href="#防止systemd更新导致配置被重置" class="headerlink" title="防止systemd更新导致配置被重置"></a>防止systemd更新导致配置被重置</h2><ol>
+<li>查看软链到哪个配置文件：<code>ls -l /etc/systemd/system/getty.target.wants/getty@tty1.service</code></li>
+<li>结果为：<code>/usr/lib/systemd/system/getty@.service</code></li>
+<li>修改文件属性：<code>sudo chattr +i /usr/lib/systemd/system/getty@.service</code></li>
 </ol>
 
       </div>
@@ -634,7 +630,7 @@
     </li>
     <li class="post-copyright-link">
     <strong>文章链接:  </strong>
-    <a href="/2023/01/07/linux-zram/" target="_blank" title="使用zram创建swap分区">http://groveer.github.com/2023/01/07/linux-zram/</a>
+    <a href="/linux-auto-login/" target="_blank" title="使用 systemd 实现自动登陆">http://groveer.github.com/linux-auto-login/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明:   </strong>
@@ -656,17 +652,17 @@
   <div class="post-nav-prev post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1014/20201014094513254.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1010/20201010015227209.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1010/20201010015227209.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
     </div>
-    <a href="/2023/01/07/git/" class="post-nav-link">
+    <a href="/linux-mount/" class="post-nav-link">
       <div class="title">
         <i class="fas fa-angle-left"></i> 上一篇:
-        <div class="title-text">git 命令使用方法</div>
+        <div class="title-text">Linux 磁盘挂载</div>
       </div>
       
       <!-- <div class="content">
-        本文章只提供一些不常见的用法，对于 git 基本用法，网上教程很多，这里不再赘述。
-统计两个tag间代码增删情况1git
+        这里提供一些在 Linux 环境下磁盘挂载小技巧。
+将U盘挂载到普通用户目录12mkdir $HOME/usbsudo 
       </div> -->
     </a>
   </div>
@@ -677,16 +673,15 @@
   <div class="post-nav-next post-nav-item">
     <div class="post-nav-img" style="background-size: cover; 
       background-position: center center;">
-      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2020/1010/20201010015227209.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1010/20201010015227209.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
+      <img class="lazyload lazyload placeholder" src="https://pic.3gbizhi.com/2022/0801/20220801050428563.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2022/0801/20220801050428563.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" src="" alt="">
     </div>
-    <a href="/2023/01/07/linux-mount/" class="post-nav-link">
+    <a href="/deepin-repair-system/" class="post-nav-link">
       <div class="title">
         下一篇: <i class="fas fa-angle-right"></i>
-        <div class="title-text">Linux 磁盘挂载</div>
+        <div class="title-text">Deepin 系统修复</div>
       </div>
       <!-- <div class="content">
-        这里提供一些在 Linux 环境下磁盘挂载小技巧。
-将U盘挂载到普通用户目录12mkdir $HOME/usbsudo 
+        Deepin 系统是一个基于 debian 的操作系统（UOS 为其专业版），最近发现很多小伙伴在升级时可能导致系统崩溃
       </div> -->
     </a>
   </div>
@@ -901,7 +896,7 @@
   <div class='content'>
     <div class="toc-main">
       <div class="toc-content">
-        <!--  -->
+        <!-- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8systemd%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%8A%A8%E7%99%BB%E9%99%86"><span class="toc-text">使用systemd实现自动登陆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E6%AD%A2systemd%E6%9B%B4%E6%96%B0%E5%AF%BC%E8%87%B4%E9%85%8D%E7%BD%AE%E8%A2%AB%E9%87%8D%E7%BD%AE"><span class="toc-text">防止systemd更新导致配置被重置</span></a></li></ol> -->
         <div class="toc"></div>
       </div>
     </div>
@@ -934,7 +929,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/cmake-advanced/" class="post-img " style="background-size: cover; 
+              <a href="/cmake-advanced/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1011/20201011011357831.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -945,7 +940,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/cmake-advanced/">CMake 进阶用法</a>
+              <a class="post-title" href="/cmake-advanced/">CMake 进阶用法</a>
             </div>
           </div>
         
@@ -955,7 +950,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/cmake-basic/" class="post-img " style="background-size: cover; 
+              <a href="/cmake-basic/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1026/20201026030701596.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -966,7 +961,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/cmake-basic/">CMake 基础用法</a>
+              <a class="post-title" href="/cmake-basic/">CMake 基础用法</a>
             </div>
           </div>
         
@@ -976,7 +971,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/qt-tips/" class="post-img " style="background-size: cover; 
+              <a href="/qt-tips/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1028/20201028105748891.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -987,7 +982,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/qt-tips/">Qt 提升代码质量的方法</a>
+              <a class="post-title" href="/qt-tips/">Qt 提升代码质量的方法</a>
             </div>
           </div>
         
@@ -997,7 +992,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/vscode/" class="post-img " style="background-size: cover; 
+              <a href="/vscode/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1030/20201030125909583.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -1008,7 +1003,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/vscode/">VsCode 使用小技巧</a>
+              <a class="post-title" href="/vscode/">VsCode 使用小技巧</a>
             </div>
           </div>
         
@@ -1018,7 +1013,7 @@
             
 
             <div class="post-img-box">
-              <a href="/2023/01/07/vim/" class="post-img " style="background-size: cover; 
+              <a href="/vim/" class="post-img " style="background-size: cover; 
                 background-position: center center;">
                 <img class="lazyload lazyload placeholder" style="width:100%;height:100%;object-fit:cover;" data-src="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" class="lazyload placeholder" data-srcset="https://pic.3gbizhi.com/2020/1104/20201104025420875.jpg" srcset="https://pic1.zhimg.com/v2-cd38920285d125be80b3eb504052c550_b.webp" alt="">
               </a>
@@ -1029,7 +1024,7 @@
                   <span class="post-date">01-07</span>
                 
               </div>
-              <a class="post-title" href="/2023/01/07/vim/">vim 配置</a>
+              <a class="post-title" href="/vim/">vim 配置</a>
             </div>
           </div>
         
