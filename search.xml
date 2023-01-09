@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>NetworkManager 一些技巧</title>
+      <link href="/linux-networkmanager/"/>
+      <url>/linux-networkmanager/</url>
+      
+        <content type="html"><![CDATA[<p>NetworkManager 是一个为系统提供检测和配置功能以便自动连接到网络的程序。NetworkManager 的功能对无线和有线网络都很有用。</p><h2 id="使用-nmcli-进行安全认证"><a href="#使用-nmcli-进行安全认证" class="headerlink" title="使用 nmcli 进行安全认证"></a>使用 nmcli 进行安全认证</h2><p>使用 nmcli 命令进入交互命令行模式：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli c edit &lt;connection_name&gt;</span><br></pre></td></tr></table></figure><p>配置 802.1x 认证：</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">nmcli&gt; </span><span class="language-bash"><span class="built_in">set</span> 802-1x.eap peap              // peaph认证模式</span></span><br><span class="line"><span class="meta prompt_">nmcli&gt; </span><span class="language-bash"><span class="built_in">set</span> 802-1x.phase2-auth gtc       // 认证方式</span></span><br><span class="line"><span class="meta prompt_">nmcli&gt; </span><span class="language-bash"><span class="built_in">set</span> 802-1x.identity USERNAME     // 联网账号</span></span><br><span class="line"><span class="meta prompt_">nmcli&gt; </span><span class="language-bash"><span class="built_in">set</span> 802-1x.password USERPASS     // 账号密码</span></span><br><span class="line"><span class="meta prompt_">nmcli&gt; </span><span class="language-bash">save                             // 保存</span></span><br><span class="line"><span class="meta prompt_">nmcli&gt; </span><span class="language-bash">quit                             // 退出</span></span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> Linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> NetworkManager </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>CMake 进阶用法</title>
       <link href="/cmake-advanced/"/>
       <url>/cmake-advanced/</url>
